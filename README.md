@@ -3,18 +3,24 @@ An automatic cell type identification pipeline for spatial transcriptomics(CosMx
 
 The motivation of developing this pipeline is using the rich gene expression information from scRNA-seq to address the issue of sub-celltype classification in spatial data.
 
-This pipeline includes three main steps, one preprocessing and evaluation. All the things showed here can be done automatically.
+This pipeline includes three main steps, one preprocessing and evaluation. All the things showed here can be done automatically. The workflow is demonstrated as below:
 
 
 ## Step 0: Preprocessing
 
-Preprocessing imports `Seurat` package to find the marker genes of spatial trnscriptomics overlapped with scRNA-seq reference, and use our `spatial-pipeline` to get the preprocessed spatial transcriptomics in the format of giotto object.
+Preprocessing imports `Seurat` package to find the marker genes of spatial trnscriptomics overlapped with scRNA-seq reference, and use the `spatial-pipeline` developed by our team to get the preprocessed spatial transcriptomics in the format of a Giotto object.
 
-The input of this step is the file path of scRNA-seq reference and spatial transcriptomics, and the output contains two kinds of files, a giotto object and expression matrix. Specifically, the expression matrix for main celltypes and all sub-celltypes contained in each main celltype. 
+Users should first tell us whether the dataset they are going to analyze is CosMx or Xenium. Because the preprocessing in `spatial-pipeline` will be slightly different.
+
+The input of this step includes the file path of scRNA-seq reference and spatial transcriptomics, and the output contains two kinds of files, a Giotto object and expression matrix. Specifically, the expression matrix for main celltypes and all sub-celltypes contained in each main celltype. 
 
 ## Step 1: Majority Vote
 
 Majority Vote includes two parts, the first is using `Insitutype` package to perform supervised-celltype-classification for main celltypes. And the second is using majority voting to give every cluster a label inlcuding all the possible main celltypes. 
+
+The input of both CosMx and Xenium includes the file path of scRNA-seq reference and generated Giotto object after preprocessing. While for CosMx datasets, users should also tell us the path of the immunofluorescence data.
+After this step, the Giotto object will be renewed with newly annotated majority vote results.
+
 
 ## Step 2: Coarse Classification
 
