@@ -5,6 +5,10 @@ The motivation of developing this pipeline is using the rich gene expression inf
 
 This pipeline includes three main steps, one preprocessing and evaluation. All the things showed here can be done automatically. The workflow is demonstrated as below:
 
+<div style="text-align:center;">
+    <img src="pic/image.png" alt="My Image" width="400px">
+</div>
+
 
 ## Step 0: Preprocessing
 
