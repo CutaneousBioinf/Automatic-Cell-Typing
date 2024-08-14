@@ -20,11 +20,10 @@ The input of this step includes the file path of scRNA-seq reference and spatial
 
 ## Step 1: Majority Vote
 
-Majority Vote includes two parts, the first is using `Insitutype` package to perform supervised-celltype-classification for main celltypes. And the second is using majority voting to give every cluster a label inlcuding all the possible main celltypes. 
+Majority Vote involves clustering cells by celltype, calculating and normalizing the percentages of each cell type within clusters, and identifying main cell types based on cumulative percentage thresholds. Clusters needing further sub-clustering are flagged. Majority Vote applies both the thoughts from the school of probability and the school of Bayesian. If users have any prior knowledge about the celltypes, they are approved to slightly adjust the results.
 
 The input of both CosMx and Xenium includes the file path of scRNA-seq reference and generated Giotto object after preprocessing. While for CosMx datasets, users should also tell us the path of the immunofluorescence data.
-After this step, the Giotto object will be renewed with newly annotated majority vote results.
-
+The method then updates the Giotto object with new cell type assignments and saves it, while identifying clusters that require additional sub-clustering.
 
 ## Step 2: Coarse Classification
 
