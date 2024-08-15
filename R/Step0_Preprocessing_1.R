@@ -1,15 +1,17 @@
-# args = commandArgs(trailingOnly=TRUE) 
+# This script is used to preprocess the Xenium data and generate the Giotto object
 
-# if (length(args)<2){
-#     print("Usage: xenium.folders results.folder")
-#     quit(status = 1)
-# }
+args = commandArgs(trailingOnly=TRUE) 
 
-# xenium_folders <- scan(args[1],what="",quiet=T)
-# results_folder <- args[2]
+if (length(args)<2){
+    print("Usage: xenium.folders results.folder")
+    quit(status = 1)
+}
 
-results_folder = "/home/zhanh/Janssen_AD_xenium/results"
-xenium_folders=scan(paste0("Janssen_AD_xenium/Janssen_Xenium_AD_UMcustom.panel"),what="",quiet=T)
+xenium_folders <- scan(args[1],what="",quiet=T)
+results_folder <- args[2]
+
+# results_folder = "/home/zhanh/Janssen_AD_xenium/results"
+# xenium_folders=scan(paste0("Janssen_AD_xenium/Janssen_Xenium_AD_UMcustom.panel"),what="",quiet=T)
 
 
 #### check and set up Giotto environment ####
