@@ -12,7 +12,7 @@ This pipeline includes three main steps, one preprocessing and evaluation. All t
 
 ## Step 0: Preprocessing
 
-Preprocessing imports `Seurat` package to find the marker genes of spatial trnscriptomics overlapped with scRNA-seq reference, and use the `spatial-pipeline` developed by our team to get the preprocessed spatial transcriptomics in the format of a Giotto object.
+Preprocessing imports `Seurat` package to find the marker genes of spatial trnscriptomics overlapped with scRNA-seq reference, and use the [spatial-pipeline](https://github.com/CutaneousBioinf/spatial-pipeline/tree/main/Xenium) developed by our team to get the preprocessed spatial transcriptomics in the format of a Giotto object.
 
 Users should first tell us whether the dataset they are going to analyze is CosMx or Xenium. Because the preprocessing in `spatial-pipeline` will be slightly different.
 
