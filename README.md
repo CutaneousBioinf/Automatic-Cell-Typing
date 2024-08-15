@@ -33,7 +33,7 @@ For each leiden cluster that has score criteria larger than 95%, which is define
 ## Step 3: Precise Classification
 
 Precise Classification further classifies the cells within each main cell type and identify each sub-celltype.
-Clustering results from `BASS` are used as prior info. 
+Clustering results from [BASS](https://github.com/zhengli09/BASS) are used as prior info. 
 
 The output of this step contains a renewed giotto object, and a umap plot of whole dataset.
 
