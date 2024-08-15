@@ -188,12 +188,55 @@ for (i in names(temp.exp_mat)[1]){
 
 
 
+
 ### looks like the giotto normalized matrix provides reasonable results
 i=1
 for (f in names(temp.is.ML[[i]])){
   a <- temp.is.ML[[i]][[f]]$clust
   tempcell[names(a)] <- a
 }
+
+sup = temp.is.ML[[i]]
+heatmap(sweep(sup$profiles, 1, pmax(apply(sup$profiles, 1, max), .2), "/"), scale = "none",
+        main = "Mean cell type expression profiles")
+
+sup = temp.is.ML[[i]]
+cols <-
+  c(
+    '#8DD3C7',
+    '#BEBADA',
+    '#FB8072',
+    '#80B1D3',
+    '#FDB462',
+    '#B3DE69',
+    '#FCCDE5',
+    '#D9D9D9',
+    '#BC80BD',
+    '#CCEBC5',
+    '#FFED6F',
+    '#E41A1C',
+    '#377EB8',
+    '#4DAF4A',
+    '#984EA3',
+    '#FF7F00',
+    '#FFFF33',
+    '#A65628',
+    '#F781BF',
+    '#999999'
+  )
+
+cols <- cols[seq_along(unique(sup$clust))]
+names(cols) <- unique(sup$clust)
+
+# make the flightpath plot
+png("output.png", width = 500, height = 700, res = 300)
+fp <- flightpath_plot(flightpath_result = NULL, insitutype_result = sup, col = cols[sup$clust])
+dev.off()
+
+print(fp)
+
+
+
 
 #xenium_gobj@cell_metadata$cell$rna$sub_cell_type_isML_updated = xenium_gobj@cell_metadata$cell$rna$cell_type_isML_updated.sub
 
