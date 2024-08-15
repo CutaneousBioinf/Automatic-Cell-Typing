@@ -9,6 +9,7 @@ This pipeline includes three main steps, one preprocessing and evaluation. All t
     <img src="pic/image.png" alt="Workflow" width="800px">
 </div>
 
+The input of this pipeline includes the path to the scRNA-seq reference, and the path to the spatial transcriptomics dataset. The output of this pipeline is a renewed Giotto object with two kinds of annotations: automatic-cell-typing using [Insitutype](https://github.com/Nanostring-Biostats/InSituType) and that using [Symphony](https://github.com/immunogenomics/symphony?tab=readme-ov-file). We also provided a spearman correlation matrix to make comparisons between these two methods.
 
 ## Step 0: Preprocessing
 
