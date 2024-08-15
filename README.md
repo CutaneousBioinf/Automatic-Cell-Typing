@@ -28,14 +28,14 @@ The method then updates the Giotto object with new cell type assignments and sav
 ## Step 2: Coarse Classification
 
 Coarse Classification aims at assigning each cell to one specific main celltype. 
-For each leiden cluster that has score criteria larger than 95%, which is defined by more than one celltype in Step 1, a subset Giotto object of main celltypes included in the mixture cluster will be extracted.
-
-Run PCA, UMAP, and Harmony to get the renewed umap info for each selected cell
-InsitutypeML:
-(1) Prior info: umap and global coordinates
-(2) Reference matrix: Marker genes* main cell types, delete all the overlapped marker genes
+For each leiden cluster that has score criteria larger than 95%, which is defined by more than one celltype in Step 1, a subset Giotto object of main celltypes included in the mixture cluster will be extracted. Then insitutypeML is applied to 
 
 ## Step 3: Precise Classification
+
+Precise Classification further classifies the cells within each main cell type and identify each sub-celltype.
+Clustering results from `BASS` are used as prior info. 
+
+The output of this step contains a renewed giotto object, and a umap plot of whole dataset.
 
 
 
