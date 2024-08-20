@@ -14,7 +14,7 @@ The input of this pipeline includes the path to the scRNA-seq reference, and the
 The umap plot below demonstrates the final performance of our pipeline in multi-sample problem. 
 
 <div style="text-align:center;">
-    <img src="pic/8.18_8.1_UMAP_sequenced.cell.types.subcelltyping_isML.png" alt="Final result" width="480px">
+    <img src="pic/8.18_8.1_UMAP_sequenced.cell.types.subcelltyping_isML.png" alt="Final result" width="800px">
 </div>
 
 ## Step 0: Preprocessing
