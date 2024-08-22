@@ -9,11 +9,11 @@ library('irlba')
 set.seed(0)
 
 ## Build reference
-skip_build_ref = FALSE
+skip_build_ref = TRUE
 ref_exp_path = '/home/yulicai/symphony/exprs_norm.rds'	# janssen ad
 ref_metadata_path = '/home/yulicai/symphony/metadata.rds'
-#ref_exp = readRDS(ref_exp_path)	
-#ref_metadata = readRDS(ref_metadata_path)
+ref_exp = readRDS(ref_exp_path)	
+ref_metadata = readRDS(ref_metadata_path)
 maintype_col_name = 'celltype.global'  # column in metadata representing main celltype
 subtype_col_name = 'celltype'   # column in metadata representing sub celltype
 
@@ -260,6 +260,8 @@ seurat_merged <- merge(seurat_objs[[1]], y=seurat_objs[2:length(seurat_objs)], a
 	seurat_merged <- seurat_objs[1]
 }
 
+print(str(seurat_merged))
+
 # Map main celltype
 print('Mapping main celltypes...')
 query_exp = seurat_merged$RNA@data
@@ -281,7 +283,6 @@ plotBasic(cbind(query$meta_data, query$umap),
           size = c(8,10))
 
 
-
 ########## Predict Sub Celltype ##########
 print('Start working on sub celltypes.')
 celltypes_with_sub = list()
@@ -290,6 +291,7 @@ for (main_type in names(table(reference_main$meta_data[,maintype_col_name]))){
 	if (length(table(ref_metadata_sub[,subtype_col_name])) <= 1){next}
     celltypes_with_sub[main_type] <- as.data.frame(names(table(ref_metadata_sub[,subtype_col_name])))
 }
+print("Main celltypes with sub celltypes:")
 print(celltypes_with_sub)
 
 # plot distribution of celltypes in reference space
@@ -309,12 +311,11 @@ for (main_type in names(celltypes_with_sub)){
 
 # Map sub celltype
 print('Mapping main celltypes...')
-sub_results = c()
+i = 1
 for (main_type in names(celltypes_with_sub)){
     reference_sub <- readRDS(paste(save_sub_ref_dir,'/ref_sub_',gsub(' ','-',main_type),'.rds', sep=''))
 	query_metadata_sub = query$meta_data[query$meta_data[paste(maintype_col_name,'.pred',sep='')] == main_type,]
 	query_exp_sub = as.array(query$exp)[,rownames(query_metadata_sub)]
-	#query_umap_sub = query$umap[rownames(query_metadata_sub),]
 	query_sub = mapQuery(query_exp_sub,             # query gene expression (genes x cells)
 	                     query_metadata_sub,        # query metadata (cells x attributes)
 	                     reference_sub,             # Symphony reference object
@@ -324,26 +325,32 @@ for (main_type in names(celltypes_with_sub)){
 	                       reference_sub, 
 	                       reference_sub$meta_data[,subtype_col_name], 
 	                       k = k,
-	                       save_as = paste(subtype_col_name,'.pred',sep=''))
+	                       save_as = paste(main_type,'.pred',sep=''))
 	umap_combined_labels = cbind(query_sub$meta_data, query_sub$umap)
     plotBasic(umap_combined_labels, 
               title = paste('Query Cells in Reference UMAP Space of', main_type), 
-              color.by = paste(subtype_col_name,'.pred',sep=''),
+              color.by = paste(main_type,'.pred',sep=''),
               save_path = paste(output_dir, '/4-sub_celltype_pred_',gsub(' ','-',main_type),'.png', sep=''),
               size = c(8,10))
-    query_sub$meta_data$celltype.final <- query_sub$meta_data[,dim(query_sub$meta_data)[2]-1]
-    if (length(sub_results==0)){
+    query_sub$meta_data$celltype.pred.final <- query_sub$meta_data[,paste(main_type,'.pred',sep='')]
+    query_sub$meta_data[paste(main_type,'.UMAP1',sep='')] <- query_sub$umap['UMAP1']
+    query_sub$meta_data[paste(main_type,'.UMAP2',sep='')] <- query_sub$umap['UMAP2']
+    if (i==1){
         sub_results = query_sub$meta_data
+        i <- i+1
     } else {
         sub_results = bind_rows(sub_results, query_sub$meta_data)
     }
 }
 
 query$meta_data <- cbind(query$meta_data, query$umap)
-query$meta_data$celltype.final <- query$meta_data[,paste(maintype_col_name,'.pred',sep='')]
-label_main <- query$meta_data[!(query$meta_data$celltype.final %in% celltypes_with_sub),]
+query$meta_data$celltype.pred.final <- query$meta_data[,paste(maintype_col_name,'.pred',sep='')]
+label_main <- query$meta_data %>% filter(!(celltype.pred.final %in% names(celltypes_with_sub)))
+print(str(label_main))
 label_final <- bind_rows(label_main, sub_results)
+label_final$celltype.pred.final <- as.factor(as.character(label_final$celltype.pred.final))
 
 saveRDS(label_final, file=paste(output_dir, '/symphony_celltype_results.rds', sep=''))
 
 print(str(label_final))
+print(table(label_final$celltype.pred.final))
