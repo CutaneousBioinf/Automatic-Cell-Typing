@@ -9,7 +9,7 @@ library('irlba')
 set.seed(0)
 
 ## Build reference
-skip_build_ref = TRUE
+skip_build_ref = FALSE
 ref_exp_path = '/home/yulicai/symphony/exprs_norm.rds'	# janssen ad
 ref_metadata_path = '/home/yulicai/symphony/metadata.rds'
 ref_exp = readRDS(ref_exp_path)	
