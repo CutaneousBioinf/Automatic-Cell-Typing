@@ -9,7 +9,8 @@ library('irlba')
 set.seed(0)
 
 ## Build reference
-skip_build_ref = FALSE
+skip_build_ref_main = TRUE
+skip_build_ref_sub = FALSE
 ref_exp_path = '/home/yulicai/symphony/exprs_norm.rds'	# janssen ad
 ref_metadata_path = '/home/yulicai/symphony/metadata.rds'
 ref_exp = readRDS(ref_exp_path)	
@@ -42,9 +43,10 @@ query_paths <- c('/hits/AGC/Spatial/Xenium/hSkin_480g/10265-JF_and_10628-JF/2024
 k = 5   # the k of KNN in mapping.
 
 
-
+ref_metadata_for_sub <- ref_metadata
+ref_exp_for_sub <- ref_exp
 ########## Build the Reference for Main Celltypes ##########
-if (skip_build_ref) {print('Skip building reference.')} else {
+if (skip_build_ref_main) {print('Skip building reference for main celltypes.')} else {
 print('Start building reference for main celltypes...')
 for (p in c(save_main_ref_dir, save_main_uwot_dir, save_sub_ref_dir, save_sub_uwot_dir)) {
     if (!dir.exists(p)){
@@ -59,7 +61,7 @@ if (downsample) {
                     filter(get(subtype_col_name) != '') %>% 
                     rownames_to_column() %>% 
                     group_by(get(subtype_col_name)) %>% 
-                    sample_frac(downsample_to/dim(ref_exp)[2]) %>% 
+                    sample_frac(downsample_to/dim(ref_metadata)[1]) %>% 
                     column_to_rownames()
 } else {
     ref_metadata <- ref_metadata %>% 
@@ -113,22 +115,33 @@ reference$normalization_method = 'log(CP10k+1)'
 
 # Save Symphony reference
 saveRDS(reference, paste(save_main_ref_dir, '/ref_main.rds', sep=''))
-
+}
 
 
 ########## Build the Reference for Subtypes ##########
+if (skip_build_ref_sub) {print('Skip building reference for sub celltypes.')} else {
 print('Start building reference for sub celltypes...')
 print('Counts of each main cell type:')
 print(table(ref_metadata[,maintype_col_name]))
 
 for (main_type in names(table(ref_metadata[,maintype_col_name]))){
 	print(paste('Start building reference for', main_type, '...'))
-	ref_metadata_sub <- ref_metadata %>% filter(get(maintype_col_name) == main_type) %>% filter(get(subtype_col_name) != '') %>% rownames_to_column() %>% column_to_rownames()
+    ref_metadata_sub <- ref_metadata_for_sub %>%    # notice: here is not the processed data in last step
+                        filter(get(subtype_col_name) != '') %>% 
+                        filter(get(maintype_col_name) == main_type)
 	if (length(table(ref_metadata_sub[,subtype_col_name])) <= 1){
 		print('No subtype found. Skip.')
 		next
 	}
-	ref_exp_sub <- ref_exp[,rownames(ref_metadata_sub)]
+    if (downsample) {
+    if (dim(ref_metadata_sub)[1]>downsample_to){
+        ref_metadata_sub <- ref_metadata_sub %>% 
+                        rownames_to_column() %>% 
+                        group_by(get(subtype_col_name)) %>% 
+                        sample_frac(downsample_to/dim(ref_metadata_sub)[1]) %>% 
+                        column_to_rownames()
+    }}
+	ref_exp_sub <- ref_exp_for_sub[,rownames(ref_metadata_sub)]
 	ref_exp_sub <- ref_exp_sub[rowSums(ref_exp_sub)>0,]
 
 	# Calculate and save the mean and standard deviations for each gene
@@ -198,7 +211,7 @@ plotBasic <- function(umap_labels,                # metadata, with UMAP labels i
                       size = c(8,10)) {  
     
     p = umap_labels %>%
-            dplyr::sample_frac(1L) %>% # permute rows randomly
+            #dplyr::sample_frac(1L) %>% # permute rows randomly
             ggplot(aes(x = UMAP1, y = UMAP2)) + 
             geom_point_rast(aes(col = get(color.by)), size = 0.3, stroke = 0.2, shape = 16)
         if (!is.null(color.mapping)) { p = p + scale_color_manual(values = color.mapping) }
@@ -332,7 +345,7 @@ for (main_type in names(celltypes_with_sub)){
               color.by = paste(main_type,'.pred',sep=''),
               save_path = paste(output_dir, '/4-sub_celltype_pred_',gsub(' ','-',main_type),'.png', sep=''),
               size = c(8,10))
-    query_sub$meta_data$celltype.pred.final <- query_sub$meta_data[,paste(main_type,'.pred',sep='')]
+    query_sub$meta_data$celltype.pred.combined <- query_sub$meta_data[,paste(main_type,'.pred',sep='')]
     query_sub$meta_data[paste(main_type,'.UMAP1',sep='')] <- query_sub$umap['UMAP1']
     query_sub$meta_data[paste(main_type,'.UMAP2',sep='')] <- query_sub$umap['UMAP2']
     if (i==1){
@@ -344,13 +357,13 @@ for (main_type in names(celltypes_with_sub)){
 }
 
 query$meta_data <- cbind(query$meta_data, query$umap)
-query$meta_data$celltype.pred.final <- query$meta_data[,paste(maintype_col_name,'.pred',sep='')]
-label_main <- query$meta_data %>% filter(!(celltype.pred.final %in% names(celltypes_with_sub)))
+query$meta_data$celltype.pred.combined <- query$meta_data[,paste(maintype_col_name,'.pred',sep='')]
+label_main <- query$meta_data %>% filter(!(celltype.pred.combined %in% names(celltypes_with_sub)))
 print(str(label_main))
 label_final <- bind_rows(label_main, sub_results)
-label_final$celltype.pred.final <- as.factor(as.character(label_final$celltype.pred.final))
+label_final$celltype.pred.combined <- as.factor(as.character(label_final$celltype.pred.combined))
 
 saveRDS(label_final, file=paste(output_dir, '/symphony_celltype_results.rds', sep=''))
 
 print(str(label_final))
-print(table(label_final$celltype.pred.final))
+print(table(label_final$celltype.pred.combined))
