@@ -10,10 +10,11 @@ set.seed(0)
 
 ## Build reference
 skip_build_ref_main = TRUE
-skip_build_ref_sub = FALSE
+skip_build_ref_sub = TRUE
+skip_map_query = TRUE
 ref_exp_path = '/home/yulicai/symphony/exprs_norm.rds'	# janssen ad
 ref_metadata_path = '/home/yulicai/symphony/metadata.rds'
-ref_exp = readRDS(ref_exp_path)	
+#ref_exp = readRDS(ref_exp_path)	
 ref_metadata = readRDS(ref_metadata_path)
 maintype_col_name = 'celltype.global'  # column in metadata representing main celltype
 subtype_col_name = 'celltype'   # column in metadata representing sub celltype
@@ -44,7 +45,7 @@ k = 5   # the k of KNN in mapping.
 
 
 ref_metadata_for_sub <- ref_metadata
-ref_exp_for_sub <- ref_exp
+#ref_exp_for_sub <- ref_exp
 ########## Build the Reference for Main Celltypes ##########
 if (skip_build_ref_main) {print('Skip building reference for main celltypes.')} else {
 print('Start building reference for main celltypes...')
@@ -200,6 +201,7 @@ library(RColorBrewer)
 library(patchwork)
 library(ggpubr)
 library(Polychrome)
+library(cowplot)
 
 plotBasic <- function(umap_labels,                # metadata, with UMAP labels in UMAP1 and UMAP2 slots
                       title = 'Query',         # Plot title
@@ -233,7 +235,7 @@ plotBasic <- function(umap_labels,                # metadata, with UMAP labels i
 
 
 
-
+if (skip_build_ref_main) {print('Skip Mapping Queries.')} else {
 ########## Predict Main Celltype ##########
 for (p in c(output_dir)) {
     if (!dir.exists(p)){
@@ -367,3 +369,112 @@ saveRDS(label_final, file=paste(output_dir, '/symphony_celltype_results.rds', se
 
 print(str(label_final))
 print(table(label_final$celltype.pred.combined))
+}
+
+
+########## Draw Celltype Proportion ##########
+ref_metadata_cleaned <- ref_metadata_for_sub %>% filter(get(subtype_col_name) != '')
+label_final <- readRDS(paste(output_dir, '/symphony_celltype_results.rds', sep=''))
+
+for (p in c(output_dir)) {
+    if (!dir.exists(p)){
+        dir.create(p, recursive = TRUE)
+    }
+}
+## main celltypes
+freq_refer <- as.data.frame(table(ref_metadata_cleaned[,maintype_col_name]))
+freq_query <- as.data.frame(table(label_final[,paste(maintype_col_name,'.pred',sep='')]))
+proportions.main <- data.frame(col1=names(table(ref_metadata_cleaned[,maintype_col_name])),
+                               col2=freq_refer$Freq,
+                               col3=freq_query$Freq,
+                               col4=freq_refer$Freq/sum(freq_refer$Freq),
+                               col5=freq_query$Freq/sum(freq_query$Freq),
+                               check.rows=TRUE)
+names(proportions.main) <- c(paste(maintype_col_name),
+                             paste(maintype_col_name,'.freq.refer',sep=''),
+                             paste(maintype_col_name,'.freq.pred',sep=''),
+                             paste(maintype_col_name,'.prop.refer',sep=''),
+                             paste(maintype_col_name,'.prop.pred',sep=''))
+# save csv
+write.csv(proportions.main, file=paste(output_dir, '/5-celltype_proportion_main.csv', sep=''), row.names = FALSE)
+
+plotProp <- function(proportions,                # metadata, with UMAP labels in UMAP1 and UMAP2 slots
+                     celltype_col_name,
+                     x_col_name,
+                     y_col_name,
+                     x_label = 'Symphony Results',
+                     y_label = 'Reference',
+                     title = 'Proportions of Celltypes',         # Plot title
+                     color.mapping = NULL,    # custom color mapping
+                     legend.position = 'right', # Show cell type legend
+					 save_path = './plot.png',
+                     size = c(8,10)) {  
+    axis_limit <- ceiling(max(max(proportions[,x_col_name]),max(proportions[,y_col_name])) * 10) / 10
+    spearman <- cor.test(proportions[,x_col_name], proportions[,y_col_name], method='spearman')
+    
+    p = ggplot(proportions, aes(x=get(x_col_name), y=get(y_col_name))) + 
+               geom_abline() + 
+               geom_point_rast(aes(col = get(celltype_col_name)))
+    if (!is.null(color.mapping)) { p = p + scale_color_manual(values = color.mapping) }
+    p = p + theme_bw() +
+        labs(title = title, color = celltype_col_name) + 
+        theme(plot.title = element_text(hjust = 0.5)) +
+        theme(legend.position='right') +
+        theme(legend.text = element_text(size=8), legend.title=element_text(size=12)) + 
+    	theme(aspect.ratio=1) +
+        xlim(0, axis_limit) +
+    	ylim(0, axis_limit) +
+    	labs(x = x_label, y = y_label) +
+        guides(colour = guide_legend(override.aes = list(size = 4))) + guides(alpha = 'none')
+
+    p = add_sub(p, paste('Spearman Corr. =', spearman$estimate))
+    p = add_sub(p, paste('p =', spearman$p.value))
+
+    ggsave(save_path, plot=p, width=size[2], height=size[1])
+}
+# plot
+plotProp(proportions = proportions.main,
+         celltype_col_name = paste(maintype_col_name),
+         x_col_name = paste(maintype_col_name,'.prop.pred',sep=''),
+         y_col_name = paste(maintype_col_name,'.prop.refer',sep=''),
+         save_path = paste(output_dir, '/5-celltype_proportion_main.png', sep=''))
+
+
+## sub celltypes
+freq_refer <- as.data.frame(table(ref_metadata_cleaned[,subtype_col_name]))
+freq_query <- as.data.frame(table(label_final$celltype.pred.combined))
+proportions.sub <- data.frame(col1=names(table(ref_metadata_cleaned[,subtype_col_name])),
+                              col2=freq_refer$Freq,
+                              col3=freq_query$Freq,
+                              col4=freq_refer$Freq/sum(freq_refer$Freq),
+                              col5=freq_query$Freq/sum(freq_query$Freq),
+                              check.rows=TRUE)
+names(proportions.sub) <- c(paste(subtype_col_name),
+                            paste(subtype_col_name,'.freq.refer',sep=''),
+                            paste(subtype_col_name,'.freq.pred',sep=''),
+                            paste(subtype_col_name,'.prop.refer',sep=''),
+                            paste(subtype_col_name,'.prop.pred',sep=''))
+# save csv
+write.csv(proportions.sub, file=paste(output_dir, '/5-celltype_proportion_sub.csv', sep=''), row.names = FALSE)
+plotProp(proportions = proportions.sub,
+         celltype_col_name = paste(subtype_col_name),
+         x_col_name = paste(subtype_col_name,'.prop.pred',sep=''),
+         y_col_name = paste(subtype_col_name,'.prop.refer',sep=''),
+         save_path = paste(output_dir, '/5-celltype_proportion_sub_all.png', sep=''))
+
+
+# plot by main celltypes
+celltypes_with_sub = list()
+for (main_type in names(table(ref_metadata_cleaned[,maintype_col_name]))){
+	ref_metadata_sub <- ref_metadata_cleaned %>% filter(get(maintype_col_name) == main_type) %>% filter(get(subtype_col_name) != '') 
+	if (length(table(ref_metadata_sub[,subtype_col_name])) <= 1){next}
+
+    subgroup = proportions.sub %>% filter(get(subtype_col_name) %in% names(table(ref_metadata_sub[,subtype_col_name])))
+    #print(subgroup)
+    plotProp(proportions = subgroup,
+         celltype_col_name = paste(subtype_col_name),
+         x_col_name = paste(subtype_col_name,'.prop.pred',sep=''),
+         y_col_name = paste(subtype_col_name,'.prop.refer',sep=''),
+         title = paste('Proportions of Subtypes of', main_type), 
+         save_path = paste(output_dir, '/5-celltype_proportion_sub_',gsub(' ','-',main_type),'.png', sep=''))
+}
