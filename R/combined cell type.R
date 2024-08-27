@@ -1,3 +1,5 @@
+# This script is used to consolidate the prediction of cell type annotations derived from two different methods that we developed.
+
 results_folder = "/home/zhanh/Janssen_AD_xenium/results_aug12"
 setwd(results_folder)
 
