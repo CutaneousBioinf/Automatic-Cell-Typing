@@ -466,11 +466,13 @@ plotProp(proportions = proportions.sub,
 # plot by main celltypes
 celltypes_with_sub = list()
 for (main_type in names(table(ref_metadata_cleaned[,maintype_col_name]))){
-	ref_metadata_sub <- ref_metadata_cleaned %>% filter(get(maintype_col_name) == main_type) %>% filter(get(subtype_col_name) != '') 
-	if (length(table(ref_metadata_sub[,subtype_col_name])) <= 1){next}
-
+    # check if this main celltype has sub celltypes. if not, skip it
+    ref_metadata_sub <- ref_metadata_cleaned %>% filter(get(maintype_col_name) == main_type) %>% filter(get(subtype_col_name) != '') 
+    if (length(table(ref_metadata_sub[,subtype_col_name])) <= 1){next}
+	
+    # get subtypes within the main celltypes
     subgroup = proportions.sub %>% filter(get(subtype_col_name) %in% names(table(ref_metadata_sub[,subtype_col_name])))
-    #print(subgroup)
+    # plot and calculate spearman correlation
     plotProp(proportions = subgroup,
          celltype_col_name = paste(subtype_col_name),
          x_col_name = paste(subtype_col_name,'.prop.pred',sep=''),
