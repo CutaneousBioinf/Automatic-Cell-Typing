@@ -464,7 +464,6 @@ plotProp(proportions = proportions.sub,
 
 
 # plot by main celltypes
-celltypes_with_sub = list()
 for (main_type in names(table(ref_metadata_cleaned[,maintype_col_name]))){
     # check if this main celltype has sub celltypes. if not, skip it
     ref_metadata_sub <- ref_metadata_cleaned %>% filter(get(maintype_col_name) == main_type) %>% filter(get(subtype_col_name) != '') 
