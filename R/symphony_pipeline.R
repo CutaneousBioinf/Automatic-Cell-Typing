@@ -465,11 +465,12 @@ plotProp(proportions = proportions.sub,
 
 # plot by main celltypes
 for (main_type in names(table(ref_metadata_cleaned[,maintype_col_name]))){
-    # check if this main celltype has sub celltypes. if not, skip it
+    # choose cells only in this main celltype form the metadata
     ref_metadata_sub <- ref_metadata_cleaned %>% filter(get(maintype_col_name) == main_type) %>% filter(get(subtype_col_name) != '') 
+    # check number of sub celltype, if <= 1, skip it.
     if (length(table(ref_metadata_sub[,subtype_col_name])) <= 1){next}
 	
-    # get subtypes within the main celltypes
+    # choose proportions of subtypes within the main celltypes
     subgroup = proportions.sub %>% filter(get(subtype_col_name) %in% names(table(ref_metadata_sub[,subtype_col_name])))
     # plot and calculate spearman correlation
     plotProp(proportions = subgroup,
