@@ -480,3 +480,116 @@ for (main_type in names(table(ref_metadata_cleaned[,maintype_col_name]))){
          title = paste('Proportions of Subtypes of', main_type), 
          save_path = paste(output_dir, '/5-celltype_proportion_sub_',gsub(' ','-',main_type),'.png', sep=''))
 }
+
+
+
+########## Draw Bubble Plot ##########
+seurat_objs <- c()
+for (path in query_paths){
+    h5f <- Read10X_h5(path)
+    seurat_obj <- CreateSeuratObject(h5f$`Gene Expression`)
+    seurat_obj <- NormalizeData(seurat_obj)
+    seurat_objs <- c(seurat_objs, seurat_obj)
+}
+if (length(seurat_objs)>1) {
+seurat_merged <- merge(seurat_objs[[1]], y=seurat_objs[2:length(seurat_objs)], add.cell.ids=as.character(c(1:length(seurat_objs))))
+} else {
+	seurat_merged <- seurat_objs[1]
+}
+count <- as.matrix(seurat_merged$RNA@data)
+label_final <- readRDS(paste(output_dir, '/symphony_celltype_results.rds', sep=''))
+
+subtype <- data.frame(cellid = rownames(label_final), celltype=label_final[,paste(maintype_col_name,'.pred',sep='')])
+subtype$celltype <- as.character(subtype$celltype)
+count <- count[,subtype$cellid]
+
+metadata <- data.frame(cell_id = subtype$cellid, cell_types = subtype$celltype)
+rownames(metadata) <- metadata$`cell_id`
+seurat <- CreateSeuratObject(counts = count, meta.data = metadata)
+
+plotBubble <- function(seurat_obj,
+                       title = 'Bubble Plot',         # Plot title
+					   save_path = './plot.png',
+                       size = c(8,10)) { 
+seurat <- FindVariableFeatures(seurat, selection.method = "vst", nfeatures = 2000)
+seurat@meta.data$cell_types <- as.factor(seurat@meta.data$cell_types)
+Idents(seurat) <- seurat@meta.data$cell_types
+
+markers <- FindAllMarkers(seurat, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
+
+# Extracting top 5 marker genes for each cell type, sorted by avg_log2FC in descending order
+top5_markers <- markers %>% group_by(cluster) %>% top_n(n = 5, wt = avg_log2FC)
+
+# Creating a new column to rank genes within each cell type, sorting from high to low
+top5_markers <- top5_markers %>%
+  arrange(cluster, desc(avg_log2FC)) %>%
+  mutate(gene_rank = row_number())
+
+# Formatting the data for the bubble plot
+# Extracting log fold change and proportion of cells expressing the marker genes
+bubble_data <- top5_markers %>% 
+  select(gene, cell_type = cluster, logFC = avg_log2FC, proportion = pct.1, gene_rank)
+
+# Sorting genes for left-diagonal layout
+bubble_data <- bubble_data %>%
+  arrange(desc(cell_type), desc(gene_rank))
+
+# Converting gene names to factors to maintain the order in the plot
+bubble_data$gene <- factor(bubble_data$gene, levels = rev(unique(bubble_data$gene)))
+
+# Creating the bubble plot
+bubble_plot <- ggplot(bubble_data, aes(x = cell_type, y = gene, size = proportion, color = logFC)) +
+  geom_point() +
+  scale_color_gradient2(low = "white", mid = "grey", high = "red", midpoint = 0) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    panel.background = element_rect(fill = "white"),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  ) +
+  labs(title = title,
+       x = "Cell Type",
+       y = "Gene",
+       size = "Proportion of Cells Expressing",
+       color = "Log Fold Change")
+
+# Save the bubble plot
+ggsave(save_path, plot = bubble_plot, width = size[2], height = size[1])
+                     }
+
+## for main celltypes
+#plotBubble(seurat_obj=seurat,
+#           title="Marker Genes of Main Celltypes",
+#           save_path=paste(output_dir, '/6-bubble_plot_main.png', sep=''))
+
+## for sub-types
+count <- as.matrix(seurat_merged$RNA@data)
+label_final <- readRDS(paste(output_dir, '/symphony_celltype_results.rds', sep=''))
+
+subtype <- data.frame(cellid = rownames(label_final), celltype=label_final$celltype.pred.combined)
+subtype$celltype <- as.character(subtype$celltype)
+count <- count[,subtype$cellid]
+# plot by main celltypes
+for (main_type in names(table(label_final[,paste(maintype_col_name,'.pred',sep='')]))){
+    # choose cells only in this main celltype form the metadata
+    label_final_sub <- label_final %>% 
+                       filter(get(paste(maintype_col_name,'.pred',sep='')) == main_type) %>% 
+                       filter(celltype.pred.combined != '') 
+    label_final_sub$celltype.pred.combined <- as.character(label_final_sub$celltype.pred.combined)
+    # check number of sub celltype, if <= 1, skip it.
+    if (length(table(label_final_sub$celltype.pred.combined)) <= 1){next}
+
+    # choose proportions of subtypes within the main celltypes
+    subtype_sub <- subtype[subtype$celltype %in% names(table(label_final_sub$celltype.pred.combined)),]
+    count_sub <- count[,subtype_sub$cellid]
+
+    metadata <- data.frame(cell_id = subtype_sub$cellid, cell_types = subtype_sub$celltype)
+    rownames(metadata) <- metadata$`cell_id`
+    seurat <- CreateSeuratObject(counts = count_sub, meta.data = metadata)
+
+    # plot 
+    plotBubble(seurat_obj=seurat,
+               title=paste("Marker Genes of", main_type),
+               save_path=paste(output_dir, '/6-bubble_plot_',gsub(' ','-',main_type),'.png', sep=''))
+}
