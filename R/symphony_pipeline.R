@@ -382,6 +382,7 @@ for (p in c(output_dir)) {
     }
 }
 ## main celltypes
+# frequences for reference and queries
 freq_refer <- as.data.frame(table(ref_metadata_cleaned[,maintype_col_name]))
 freq_query <- as.data.frame(table(label_final[,paste(maintype_col_name,'.pred',sep='')]))
 proportions.main <- data.frame(col1=names(table(ref_metadata_cleaned[,maintype_col_name])),
@@ -398,10 +399,10 @@ names(proportions.main) <- c(paste(maintype_col_name),
 # save csv
 write.csv(proportions.main, file=paste(output_dir, '/5-celltype_proportion_main.csv', sep=''), row.names = FALSE)
 
-plotProp <- function(proportions,                # metadata, with UMAP labels in UMAP1 and UMAP2 slots
-                     celltype_col_name,
-                     x_col_name,
-                     y_col_name,
+plotProp <- function(proportions,
+                     celltype_col_name,     # the column you want to used as celltypes
+                     x_col_name,            # the column for x
+                     y_col_name,            # the column for y
                      x_label = 'Symphony Results',
                      y_label = 'Reference',
                      title = 'Proportions of Celltypes',         # Plot title
@@ -409,9 +410,12 @@ plotProp <- function(proportions,                # metadata, with UMAP labels in
                      legend.position = 'right', # Show cell type legend
 					 save_path = './plot.png',
                      size = c(8,10)) {  
+    # set limits of axis
     axis_limit <- ceiling(max(max(proportions[,x_col_name]),max(proportions[,y_col_name])) * 10) / 10
+    # calculate spearman corr
     spearman <- cor.test(proportions[,x_col_name], proportions[,y_col_name], method='spearman')
     
+    # plot
     p = ggplot(proportions, aes(x=get(x_col_name), y=get(y_col_name))) + 
                geom_abline() + 
                geom_point_rast(aes(col = get(celltype_col_name)))
@@ -426,18 +430,27 @@ plotProp <- function(proportions,                # metadata, with UMAP labels in
     	ylim(0, axis_limit) +
     	labs(x = x_label, y = y_label) +
         guides(colour = guide_legend(override.aes = list(size = 4))) + guides(alpha = 'none')
-
+    # add results of Spearman Corr.
     p = add_sub(p, paste('Spearman Corr. =', spearman$estimate))
     p = add_sub(p, paste('p =', spearman$p.value))
 
+    # save plot
     ggsave(save_path, plot=p, width=size[2], height=size[1])
+
+    return(spearman)
 }
-# plot
-plotProp(proportions = proportions.main,
-         celltype_col_name = paste(maintype_col_name),
-         x_col_name = paste(maintype_col_name,'.prop.pred',sep=''),
-         y_col_name = paste(maintype_col_name,'.prop.refer',sep=''),
-         save_path = paste(output_dir, '/5-celltype_proportion_main.png', sep=''))
+
+
+# plot main celltypes
+spearman <- plotProp(proportions = proportions.main,
+                     celltype_col_name = paste(maintype_col_name),
+                     x_col_name = paste(maintype_col_name,'.prop.pred',sep=''),
+                     y_col_name = paste(maintype_col_name,'.prop.refer',sep=''),
+                     save_path = paste(output_dir, '/5-celltype_proportion_main.png', sep=''))
+# record spearman correlation
+spearman.results <- data.frame(Item = c('Main Cell Types'),
+                               Spearman.Correlation = c(spearman$estimate),
+                               p.value = c(spearman$p.value))
 
 
 ## sub celltypes
@@ -456,11 +469,14 @@ names(proportions.sub) <- c(paste(subtype_col_name),
                             paste(subtype_col_name,'.prop.pred',sep=''))
 # save csv
 write.csv(proportions.sub, file=paste(output_dir, '/5-celltype_proportion_sub.csv', sep=''), row.names = FALSE)
-plotProp(proportions = proportions.sub,
-         celltype_col_name = paste(subtype_col_name),
-         x_col_name = paste(subtype_col_name,'.prop.pred',sep=''),
-         y_col_name = paste(subtype_col_name,'.prop.refer',sep=''),
-         save_path = paste(output_dir, '/5-celltype_proportion_sub_all.png', sep=''))
+# plot all subtypes and save
+spearman <- plotProp(proportions = proportions.sub,
+                     celltype_col_name = paste(subtype_col_name),
+                     x_col_name = paste(subtype_col_name,'.prop.pred',sep=''),
+                     y_col_name = paste(subtype_col_name,'.prop.refer',sep=''),
+                     save_path = paste(output_dir, '/5-celltype_proportion_sub_all.png', sep=''))
+# record spearman correlation
+spearman.results <- rbind(spearman.results, list('All Sub-celltypes', spearman$estimate, spearman$p.value))
 
 
 # plot by main celltypes
@@ -473,13 +489,16 @@ for (main_type in names(table(ref_metadata_cleaned[,maintype_col_name]))){
     # choose proportions of subtypes within the main celltypes
     subgroup = proportions.sub %>% filter(get(subtype_col_name) %in% names(table(ref_metadata_sub[,subtype_col_name])))
     # plot and calculate spearman correlation
-    plotProp(proportions = subgroup,
-         celltype_col_name = paste(subtype_col_name),
-         x_col_name = paste(subtype_col_name,'.prop.pred',sep=''),
-         y_col_name = paste(subtype_col_name,'.prop.refer',sep=''),
-         title = paste('Proportions of Subtypes of', main_type), 
-         save_path = paste(output_dir, '/5-celltype_proportion_sub_',gsub(' ','-',main_type),'.png', sep=''))
+    spearman <-plotProp(proportions = subgroup,
+                        celltype_col_name = paste(subtype_col_name),
+                        x_col_name = paste(subtype_col_name,'.prop.pred',sep=''),
+                        y_col_name = paste(subtype_col_name,'.prop.refer',sep=''),
+                        title = paste('Proportions of Subtypes of', main_type), 
+                        save_path = paste(output_dir, '/5-celltype_proportion_sub_',gsub(' ','-',main_type),'.png', sep=''))
+    spearman.results <- rbind(spearman.results, list(main_type, spearman$estimate, spearman$p.value))
 }
+
+write.csv(spearman.results, file=paste(output_dir, '/5-celltype_proportion_spearman.csv', sep=''), row.names = FALSE)
 
 
 
