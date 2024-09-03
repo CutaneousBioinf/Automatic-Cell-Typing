@@ -11,12 +11,6 @@ This pipeline includes three main steps, one preprocessing and evaluation. All t
 
 The input of this pipeline includes the path to the scRNA-seq reference, and the path to the spatial transcriptomics dataset. The output of this pipeline is a renewed Giotto object with two kinds of annotations: automatic-cell-typing using [Insitutype](https://github.com/Nanostring-Biostats/InSituType) and that using [Symphony](https://github.com/immunogenomics/symphony?tab=readme-ov-file). We also provided a spearman correlation matrix to make comparisons between these two methods.
 
-The umap plot below demonstrates the final performance of our pipeline in multi-sample problem. 
-
-<div style="text-align:center;">
-    <img src="pic/8.18_8.1_UMAP_sequenced.cell.types.subcelltyping_isML.png" alt="Final result" width="800px">
-</div>
-
 ## Step 0: Preprocessing
 
 Preprocessing imports `Seurat` package to find the marker genes of spatial trnscriptomics overlapped with scRNA-seq reference, and use the [spatial-pipeline](https://github.com/CutaneousBioinf/spatial-pipeline/tree/main/Xenium) developed by our team to get the preprocessed spatial transcriptomics in the format of a Giotto object.
@@ -64,3 +58,15 @@ The purpose of evaluation is to verify whether this pipeline reveals informative
 
 1) Cell type proportions comparison between scRNA-seq reference and spatial transcriptomics
 2) Marker gene identification of each sub-celltype
+3) Comparison of Spearman correlation between different methods.
+
+The comparison of Spearman correlation shows as the table below:
+
+| | Symphony in our pipeline | InsitutypeML+BASS in our pipeline | InsitutypeML |
+| :----: | :----:   | :----:    | :----:   |
+| Overall |
+| Keratinocytes |
+| Myeloid |
+| Tcells |
+
+
