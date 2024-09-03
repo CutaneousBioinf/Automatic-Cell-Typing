@@ -44,7 +44,19 @@ Clustering results from [BASS](https://github.com/zhengli09/BASS) are used as pr
 
 The output of this step contains a renewed giotto object, and a umap plot of whole dataset.
 
+## Step 4: Symphony Mapping
 
+[Symphony](https://github.com/immunogenomics/symphony) is an algorithm that localizes query cells within a stable low-dimensional reference embedding, facilitating reproducible downstream transfer of reference-defined annotations to the query. It projects query cell into reference embedding to assign celltype. 
+
+We use a 2-step algorithm with Symphony in our pipeline. In the first step, it builds a reference for main celltypes and assigns main celltypes to queries. If the main celltype has multiple sub-celltypes, it will go to the second step. In the second step, it builds a reference for each main celltype and assigns sub-celltypes to queries within the main celltype.
+
+To build a reference from scRNA-seq data and map queries, it requires 3 inputs:
+
+1. a log(CP10K + 1) normalized gene x cell expresion matrix of scRNA-seq data
+
+2. a metadata matrix of scRNA-seq data, containing main celltype and sub-celltype 
+
+3. a log(CP10K + 1) normalized gene x cell expresion matrix of queries
 
 ## Evaluation
 
