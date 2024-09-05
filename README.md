@@ -24,21 +24,24 @@ The input of this step includes the file path of scRNA-seq reference and spatial
 Majority Vote involves clustering cells by celltype, calculating and normalizing the percentages of each cell type within clusters, and identifying main cell types based on cumulative percentage thresholds. Clusters needing further sub-clustering are flagged. Majority Vote applies both the thoughts from the school of probability and the school of Bayesian. If users have any prior knowledge about the celltypes, they are approved to slightly adjust the results.
 
 The input of both CosMx and Xenium includes the file path of scRNA-seq reference and generated Giotto object after preprocessing. While for CosMx datasets, users should also tell us the path of the immunofluorescence data.
-The method then updates the Giotto object with new cell type assignments and saves it, while identifying clusters that require additional sub-clustering. Users can find the majority vote results with 
-
+The method then updates the Giotto object with new cell type assignments and saves it, while identifying clusters that require additional sub-clustering. 
+Users can find the majority vote results with 
 `xenium_gobj@cell_metadata$cell$rna$cell_type_majorvote`
 
 ## Step 2: Coarse Classification
 
 Coarse Classification aims at assigning each cell to one specific main celltype. 
-For each leiden cluster that has score criteria larger than 95%, which is defined by more than one celltype in Step 1, a subset Giotto object of main celltypes included in the mixture cluster will be extracted. Then insitutypeML is applied to 
+For each leiden cluster that has score criteria larger than 95%, which is defined by more than one celltype in Step 1, a subset Giotto object of main celltypes included in the mixture cluster will be extracted. Then insitutypeML is applied to assign each cell to the specific main celltype. 
+
+The output of this step is a renewed giotto object, the coarse classification results can be found with
+`xenium_gobj@cell_metadata$cell$rna$cell_type_isML_updated`
 
 ## Step 3: Precise Classification
 
 Precise Classification further classifies the cells within each main cell type and identify each sub-celltype.
 Clustering results from [BASS](https://github.com/zhengli09/BASS) are used as prior info. 
 
-The output of this step contains a renewed giotto object, and a umap plot of whole dataset.
+The output of this step contains a renewed giotto object, and a umap plot of the whole dataset. The precise classification results can be found with `xenium_gobj@cell_metadata$cell$rna$cell_type_isML_updated.sub`
 
 ## Step 4: Symphony Mapping
 
@@ -66,9 +69,10 @@ The comparison of Spearman correlation shows as the table below:
 
 | | Symphony in our pipeline | InsitutypeML+BASS in our pipeline | InsitutypeML |
 | :----: | :----:   | :----:    | :----:   |
-| Overall |
-| Keratinocytes |
-| Myeloid |
-| Tcells |
+| Main Celltypes | 0.842 | 
+| All Sub-celltypes | 0.725 |
+| Keratinocytes | 0.943 |
+| Myeloid | 0.349 |
+| Tcells | 0.745 |
 
 
