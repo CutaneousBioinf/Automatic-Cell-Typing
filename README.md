@@ -19,6 +19,8 @@ Users should first tell us whether the dataset they are going to analyze is CosM
 
 The input of this step includes the file path of scRNA-seq reference and spatial transcriptomics, and the output contains two kinds of files, a Giotto object and expression matrix. Specifically, the expression matrix for main celltypes and all sub-celltypes contained in each main celltype. 
 
+The output marker gene files includes `global_ct_marker_expression_matrix.csv`, `subtype_T_marker_expression_filtered_matrix.csv`, `subtype_Myeloid_marker_expression_filtered_matrix.csv`, and `subtype_keratinocyte_marker_expression_matrix`
+
 ## Step 1: Majority Vote
 
 Majority Vote involves clustering cells by celltype, calculating and normalizing the percentages of each cell type within clusters, and identifying main cell types based on cumulative percentage thresholds. Clusters needing further sub-clustering are flagged. Majority Vote applies both the thoughts from the school of probability and the school of Bayesian. If users have any prior knowledge about the celltypes, they are approved to slightly adjust the results.
