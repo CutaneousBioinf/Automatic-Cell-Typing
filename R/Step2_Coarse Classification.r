@@ -1,6 +1,4 @@
-library(Seurat)
-
-sub_celltype_insitutypeML <- function(cluster, sub_celltype){
+ sub_celltype_insitutypeML <- function(cluster, sub_celltype){
   #########subclustering for mixed main celltypes
   c = cluster
   temp <- subsetGiotto(xenium_gobj_updated, cell_ids=xenium_gobj_updated@cell_ID$cell[pDataDT(xenium_gobj_updated)$cell_type_majorvote==c])
@@ -65,16 +63,18 @@ sub_celltype_insitutypeML <- function(cluster, sub_celltype){
   # input 3: A "reference matrix" giving the expected expression profile of each cell type,
   # with genes in rows and cell types in columns. The reference matrix must be in linear-scale, not log-scale.
   temp.ref_mat <- list()
-  temp.sc <- as.matrix(read.table("/home/zhaixt/global_ct_DEgenes_exp.csv",row.names=1,header=T,sep=",",quote=NULL,comment.char="",check.names=F))
+  temp.sc <- as.matrix(read.table("/home/zhaixt/Xenium_Janssen_0715/data/global_ct_marker_expression_matrix.csv",row.names=1,header=T,sep=",",quote=NULL,comment.char="",check.names=F))
   row.names(temp.sc)<- gsub("\"","",row.names(temp.sc) )
   colnames(temp.sc)<- gsub("\"","",colnames(temp.sc) )
-  
+  temp.sc = t(temp.sc)
+
   #### !!!! need to select the sub-celltypes
   positions <- match(sub_celltype, colnames(temp.sc))
   if (length(positions) == 0){
     stop("sub_celltype not found in the reference matrix")
   }
   temp.ref_mat[["ref.scRNA"]] <- temp.sc[, positions]
+  temp.ref_mat[["ref.scRNA"]] <- temp.sc
   
   
   # input 4: 
@@ -133,13 +133,17 @@ sub_celltype_insitutypeML <- function(cluster, sub_celltype){
   
 }
 
+
+
+
 xenium_gobj_updated = xenium_gobj
 
-main_celltype_list = unique(xenium_gobj_updated@cell_metadata$cell$rna$cell_type_majorvote) #15
+main_celltype_list = unique(xenium_gobj_updated@cell_metadata$cell$rna$cell_type_majorvote) 
 
-xenium_gobj_updated@cell_metadata$cell$rna$cell_type_isML_updated = xenium_gobj_updated@cell_metadata$cell$rna$cell_type_majorvote
 
-for (main_celltype in main_celltype_list[5]) {
+
+
+for (main_celltype in main_celltype_list) {
   contains_comma = grepl(",", main_celltype)
   if (contains_comma){
     sub_celltype_list = as.vector(strsplit(main_celltype, ", ")[[1]])
