@@ -65,7 +65,7 @@ The purpose of evaluation is to verify whether this pipeline reveals informative
 
 1) Cell type proportions comparison between scRNA-seq reference and spatial transcriptomics
 2) Marker gene identification of each sub-celltype
-3) Comparison of Spearman correlation between different methods.
+3) Comparison of Spearman correlation of celltype proportions between different methods.
 
 The comparison of Spearman correlation shows as the table below:
 
