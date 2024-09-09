@@ -43,7 +43,9 @@ The output of this step is a renewed giotto object, the coarse classification re
 Precise Classification further classifies the cells within each main cell type and identify each sub-celltype.
 Clustering results from [BASS](https://github.com/zhengli09/BASS) are used as prior info. 
 
-The output of this step contains a renewed giotto object, and a umap plot of the whole dataset. The precise classification results can be found with `xenium_gobj@cell_metadata$cell$rna$sub_cell_type_isML_updated`
+In our pipeline, we only gave an example of Myeloid.Cells, but in reality users should type in the specific main celltype they are looking into and path to the corresponding scRNA-seq reference dataset.
+
+The outputs of this step contain a renewed giotto object, and a umap plot of the whole dataset. The precise classification results can be found with `xenium_gobj@cell_metadata$cell$rna$sub_cell_type_isML_updated`
 
 ## Step 4: Symphony Mapping
 
