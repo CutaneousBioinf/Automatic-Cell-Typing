@@ -106,27 +106,6 @@ plotUMAP(temp,
          point_size = 1,
          save_param = list(save_name = 'UMAP_bass_domain_M'))
 
-spatInSituPlotPoints(xenium_gobj,
-                     show_polygon = TRUE,
-                     polygon_color = 'white',
-                     polygon_line_size = 0.01,
-                     polygon_fill = 'bass_clus',
-                     polygon_fill_as_factor = TRUE,
-                     polygon_fill_code = col_vector,
-                     polygon_alpha = 1, # transparency of polygon colors
-                     save_param = list(base_height = 10, dpi = 1000,
-                                       save_name = 'inSitu_bass_cluster'))
-spatInSituPlotPoints(xenium_gobj,
-                     show_polygon = TRUE,
-                     polygon_color = 'white',
-                     polygon_line_size = 0.01,
-                     polygon_fill = 'bass_domain',
-                     polygon_fill_as_factor = TRUE,
-                     polygon_fill_code = col_vector,
-                     polygon_alpha = 1, # transparency of polygon colors
-                     save_param = list(base_height = 10, dpi = 1000,
-                                       save_name = 'inSitu_bass_domain'))
-
 
 ########## sub-celltyping
 
@@ -174,27 +153,24 @@ temp.ref_mat[["ref.scRNA"]] <- temp.sc
 temp.cohort.value <- giotto_c
 
 fs <- as.data.frame(unique(temp.cell_info[,3]))[,1]
+# Combine all datasets
 temp.is.ML <- list()
-
+i=1
 for (i in names(temp.exp_mat)[1]){
   print(i)
   temp.is.ML[[i]] <- list()
-  for (f in fs){
-    print(f)
-    templogical <- grep(colnames(temp.exp_mat[[i]]),pattern=f)
-    temp.is.ML[[i]][[f]] <- insitutypeML(x=t(temp.exp_mat[[i]][,templogical]), neg=temp.negmean[[i]][templogical], cohort=temp.cohort.value[templogical],reference_profiles=temp.ref_mat[["ref.scRNA"]])
-  }
+  temp.is.ML[[i]] <- insitutypeML(x=t(temp.exp_mat[[i]]), neg=temp.negmean[[i]], cohort=temp.cohort.value,reference_profiles=temp.ref_mat[["ref.scRNA"]])
 }
-
 
 
 
 ### looks like the giotto normalized matrix provides reasonable results
 i=1
-for (f in names(temp.is.ML[[i]])){
-  a <- temp.is.ML[[i]][[f]]$clust
-  tempcell[names(a)] <- a
-}
+a <- temp.is.ML[[i]]$clust
+tempcell[names(a)] <- a
+
+
+
 
 sup = temp.is.ML[[i]]
 heatmap(sweep(sup$profiles, 1, pmax(apply(sup$profiles, 1, max), .2), "/"), scale = "none",
@@ -254,7 +230,7 @@ plotUMAP(gobject = xenium_gobj,
          network_name="sNN.umap",
          point_size = 1,
          dim_reduction_name="umap",
-         save_param = list(save_name = '8.1_UMAP_M_T.sub.cell.types.updated_isML',base_width=15,base_height=12)
+         save_param = list(save_name = '8.1_UMAP_M.sub.cell.types.updated_isML',base_width=15,base_height=12)
 )
 
 saveGiotto(xenium_gobj, save_dir = results_folder, save_name = "gobj_updated_0723")
