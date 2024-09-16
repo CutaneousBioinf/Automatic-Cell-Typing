@@ -236,12 +236,14 @@ print('Loading queries...')
 seurat_objs <- c()
 for (path in query_paths){
     h5f <- Read10X_h5(path)
-    seurat_obj <- CreateSeuratObject(h5f$`Gene Expression`)
+    seurat_obj <- CreateSeuratObject(h5f$`Gene Expression`) # Not sure if it is applied to other h5 files
     seurat_obj <- NormalizeData(seurat_obj)
     seurat_objs <- c(seurat_objs, seurat_obj)
 }
+
 if (length(seurat_objs)>1) {
-seurat_merged <- merge(seurat_objs[[1]], y=seurat_objs[2:length(seurat_objs)], add.cell.ids=as.character(c(1:length(seurat_objs))))
+    seurat_merged <- merge(seurat_objs[[1]], y=seurat_objs[2:length(seurat_objs)], add.cell.ids=paste('obj',as.character(c(1:length(seurat_objs))),sep=''))
+    colnames(seurat_merged) <- sub("_", "-", colnames(seurat_merged))
 } else {
 	seurat_merged <- seurat_objs[1]
 }
@@ -482,7 +484,8 @@ for (path in query_paths){
     seurat_objs <- c(seurat_objs, seurat_obj)
 }
 if (length(seurat_objs)>1) {
-seurat_merged <- merge(seurat_objs[[1]], y=seurat_objs[2:length(seurat_objs)], add.cell.ids=as.character(c(1:length(seurat_objs))))
+    seurat_merged <- merge(seurat_objs[[1]], y=seurat_objs[2:length(seurat_objs)], add.cell.ids=paste('obj',as.character(c(1:length(seurat_objs))),sep=''))
+    colnames(seurat_merged) <- sub("_", "-", colnames(seurat_merged))
 } else {
 	seurat_merged <- seurat_objs[1]
 }

@@ -35,5 +35,6 @@ output_dir <- '/home/alextsoi/test/symphony'
 query_paths <- as.matrix(read.table("xxxxx"))[,1]
 ###query_paths <- c('/hits/AGC/Spatial/Xenium/hSkin_481g/10265-JF_and_10628-JF/20240517__214754__10265_10628-JF/20240517__214754__10265_10628-JF/output-XETG00077__0022387__10628-JF-1_ROI_A1__20240517__215149/cell_feature_matrix.h5',              '/hits/AGC/Spatial/Xenium/hSkin_480g/10265-JF_and_10628-JF/20240517__214754__10265_10628-JF/20240517__214754__10265_10628-JF/output-XETG00077__0022387__10628-JF-1_ROI_A2__20240517__215149/cell_feature_matrix.h5','/hits/AGC/Spatial/Xenium/hSkin_480g/10265-JF_and_10628-JF/20240517__214754__10265_10628-JF/20240517__214754__10265_10628-JF/output-XETG00077__0022387__10628-JF-1_ROI_B__20240517__215149/cell_feature_matrix.h5','/hits/AGC/Spatial/Xenium/hSkin_480g/10265-JF_and_10628-JF/20240517__214754__10265_10628-JF/20240517__214754__10265_10628-JF/output-XETG00077__0022387__10628-JF-1_ROI_C1__20240517__215149/cell_feature_matrix.h5')
 
+
 k = 5   # the k of KNN in mapping.
 

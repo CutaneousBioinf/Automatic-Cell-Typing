@@ -37,7 +37,7 @@ combine_celltype_data <- function(symphony_path, giotto_paths) {
     } else {
       data_insitu <- metaDT[, c("cell_ID", "sub_cell_type_isML_updated")]
     }
-    data_insitu$cell_ID <- sub("^obj", "", data_insitu$cell_ID)
+    #data_insitu$cell_ID <- sub("^obj", "", data_insitu$cell_ID)
     return(data_insitu)
   })
   
