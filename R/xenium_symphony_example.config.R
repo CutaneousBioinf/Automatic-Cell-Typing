@@ -2,23 +2,41 @@
 set.seed(0)
 
 ## Build reference
-skip_build_ref_main=FALSE
+skip_build_ref_main = FALSE
 skip_build_ref_sub = FALSE # nolint
-ref_exp_path = '/home/yulicai/symphony/exprs_norm.rds'	# janssen ad
-ref_metadata_path = '/home/yulicai/symphony/metadata.rds'
-ref_exp = readRDS(ref_exp_path)	
-ref_metadata = readRDS(ref_metadata_path)
+
+
+# if provide a giotto object directly (the Insitutype pipeline will generate a QCed giotto object)
+giotto_object = readRDS('/home/alextsoi/Researches/Novartis_Xenium_LP/analysis_mucosa/gobj')
 maintype_col_name = 'celltype.global'  # column in metadata representing main celltype
 subtype_col_name = 'celltype.sub'   # column in metadata representing sub celltype
 
-### if provide a seurat object directly
-#seurat_obj = readRDS('/home/alextsoi/db/psoriasis.scRNA/seurat_with_rachael_subtype.RDS')
-#ref_exp = seurat_obj$RNA@data    # gene x cell, should be log(CP10K + 1) normalized 
-#ref_metadata = seurat_obj@meta.data
+giotto_object = normalizeGiotto(giotto_object, norm_methods = "standard", logbase=exp(1), scalefactor = 10000)
+ref_exp = giotto_object@expression$cell$rna$raw@exprMat
+ref_metadata = giotto_object$cell$rna@metaDT
+
+
+## if provide expression matrix and metadata seperately
+#ref_exp_path = '/home/yulicai/symphony/exprs_norm.rds'	# gene x cell, should be log(CP10K + 1) normalized 
+#ref_metadata_path = '/home/yulicai/symphony/metadata.rds'
 #maintype_col_name = 'celltype.global'  # column in metadata representing main celltype
 #subtype_col_name = 'celltype.sub'   # column in metadata representing sub celltype
+#
+#ref_exp = readRDS(ref_exp_path)	
+#ref_metadata = readRDS(ref_metadata_path)
 
-downsample = TRUE    # You may need downsampling when you have too many cells.
+
+## if provide a seurat object directly
+#seurat_obj = readRDS('/home/alextsoi/db/psoriasis.scRNA/seurat_with_rachael_subtype.RDS')
+#maintype_col_name = 'celltype.global'  # column in metadata representing main celltype
+#subtype_col_name = 'celltype.sub'   # column in metadata representing sub celltype
+#
+#seurat = NormalizeData(seurat_obj)
+#ref_exp = seurat_obj$RNA@data    # gene x cell, should be log(CP10K + 1) normalized 
+#ref_metadata = seurat_obj@meta.data
+
+
+downsample = TRUE    # You may need downsampling when you have too many cells. If input is too large, it will cause an error in library Matrix.
 downsample_to = 10000  # The number of cells you want to keep. Final number may be slightly different. Ignore it when downsample=FALSE.
 vars_use = c('orig.ident') # Harmony parameter. If meta_data is dataframe, this defined which variable(s) to remove (character vector).
 
