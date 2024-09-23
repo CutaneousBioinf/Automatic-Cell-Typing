@@ -12,7 +12,7 @@ maintype_col_name = 'celltype.global'  # column in metadata representing main ce
 subtype_col_name = 'celltype.sub'   # column in metadata representing sub celltype
 
 giotto_object = normalizeGiotto(giotto_object, norm_methods = "standard", logbase=exp(1), scalefactor = 10000)
-ref_exp = giotto_object@expression$cell$rna$raw@exprMat
+ref_exp = giotto_object@expression$cell$rna$normalized@exprMat
 ref_metadata = giotto_object$cell$rna@metaDT
 
 
