@@ -13,7 +13,7 @@ subtype_col_name = 'celltype.sub'   # column in metadata representing sub cellty
 
 giotto_object = normalizeGiotto(giotto_object, norm_methods = "standard", logbase=exp(1), scalefactor = 10000)
 ref_exp = giotto_object@expression$cell$rna$normalized@exprMat
-ref_metadata = giotto_object$cell$rna@metaDT
+ref_metadata = giotto_object@cell_metadata$cell$rna@metaDT
 
 
 ## if provide expression matrix and metadata seperately
