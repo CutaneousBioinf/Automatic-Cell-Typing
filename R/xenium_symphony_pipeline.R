@@ -171,7 +171,7 @@ library(ggrastr)
 library(RColorBrewer)
 library(patchwork)
 library(ggpubr)
-library(Polychrome)
+#library(Polychrome)
 library(cowplot)
 
 plotBasic <- function(umap_labels,                # metadata, with UMAP labels in UMAP1 and UMAP2 slots
@@ -231,28 +231,11 @@ plotBasic(cbind(reference_main$meta_data, reference_main$umap$embedding),
 #          save_path = paste(output_dir, '/1-02-sub_celltype_refer.png', sep=''),
 #          size = c(8,10.5))
 
-## load query
-print('Loading queries...')
-seurat_objs <- c()
-for (path in query_paths){
-    h5f <- Read10X_h5(path)
-    seurat_obj <- CreateSeuratObject(h5f$`Gene Expression`) # Not sure if it is applied to other h5 files
-    seurat_obj <- NormalizeData(seurat_obj)
-    seurat_objs <- c(seurat_objs, seurat_obj)
-}
 
-if (length(seurat_objs)>1) {
-    seurat_merged <- merge(seurat_objs[[1]], y=seurat_objs[2:length(seurat_objs)], add.cell.ids=paste('obj',as.character(c(1:length(seurat_objs))),sep=''))
-    colnames(seurat_merged) <- sub("_", "-", colnames(seurat_merged))
-} else {
-	seurat_merged <- seurat_objs[1]
-}
-
-print(str(seurat_merged))
 
 # Map main celltype
 print('Mapping main celltypes...')
-query_exp = seurat_merged$RNA@data
+query_exp = seurat_merged$RNA$data
 query_metadata= seurat_merged@meta.data
 query = mapQuery(query_exp,             # query gene expression (genes x cells)
                  query_metadata,        # query metadata (cells x attributes)
@@ -298,8 +281,9 @@ for (main_type in names(celltypes_with_sub)){
 }
 
 # Map sub celltype
-print('Mapping main celltypes...')
+print('Mapping sub celltypes...')
 i = 1
+sub_results = data.frame()
 for (main_type in names(celltypes_with_sub)){
     reference_sub <- readRDS(paste(save_sub_ref_dir,'/ref_sub_',gsub(' ','-',main_type),'.rds', sep=''))
 	query_metadata_sub = query$meta_data[query$meta_data[paste(maintype_col_name,'.pred',sep='')] == main_type,]
@@ -476,20 +460,7 @@ write.csv(spearman.results, file=paste(output_dir, '/5-celltype_proportion_spear
 
 
 ########## Draw Bubble Plot ##########
-seurat_objs <- c()
-for (path in query_paths){
-    h5f <- Read10X_h5(path)
-    seurat_obj <- CreateSeuratObject(h5f$`Gene Expression`)
-    seurat_obj <- NormalizeData(seurat_obj)
-    seurat_objs <- c(seurat_objs, seurat_obj)
-}
-if (length(seurat_objs)>1) {
-    seurat_merged <- merge(seurat_objs[[1]], y=seurat_objs[2:length(seurat_objs)], add.cell.ids=paste('obj',as.character(c(1:length(seurat_objs))),sep=''))
-    colnames(seurat_merged) <- sub("_", "-", colnames(seurat_merged))
-} else {
-	seurat_merged <- seurat_objs[1]
-}
-count <- as.matrix(seurat_merged$RNA@data)
+count <- as.matrix(seurat_merged$RNA$counts)
 label_final <- readRDS(paste(output_dir, '/symphony_celltype_results.rds', sep=''))
 
 subtype <- data.frame(cellid = rownames(label_final), celltype=label_final[,paste(maintype_col_name,'.pred',sep='')])
@@ -499,6 +470,7 @@ count <- count[,subtype$cellid]
 metadata <- data.frame(cell_id = subtype$cellid, cell_types = subtype$celltype)
 rownames(metadata) <- metadata$`cell_id`
 seurat <- CreateSeuratObject(counts = count, meta.data = metadata)
+seurat <- NormalizeData(seurat)
 
 plotBubble <- function(seurat_obj,
                        title = 'Bubble Plot',         # Plot title
@@ -551,13 +523,13 @@ bubble_plot <- ggplot(bubble_data, aes(x = cell_type, y = gene, size = proportio
 ggsave(save_path, plot = bubble_plot, width = size[2], height = size[1])
                      }
 
-## for main celltypes
-#plotBubble(seurat_obj=seurat,
-#           title="Marker Genes of Main Celltypes",
-#           save_path=paste(output_dir, '/6-bubble_plot_main.png', sep=''))
+# for main celltypes
+plotBubble(seurat_obj=seurat,
+           title="Marker Genes of Main Celltypes",
+           save_path=paste(output_dir, '/6-bubble_plot_main.png', sep=''))
 
 ## for sub-types
-count <- as.matrix(seurat_merged$RNA@data)
+count <- as.matrix(seurat_merged$RNA$data)
 label_final <- readRDS(paste(output_dir, '/symphony_celltype_results.rds', sep=''))
 
 subtype <- data.frame(cellid = rownames(label_final), celltype=label_final$celltype.pred.combined)
@@ -580,6 +552,7 @@ for (main_type in names(table(label_final[,paste(maintype_col_name,'.pred',sep='
     metadata <- data.frame(cell_id = subtype_sub$cellid, cell_types = subtype_sub$celltype)
     rownames(metadata) <- metadata$`cell_id`
     seurat <- CreateSeuratObject(counts = count_sub, meta.data = metadata)
+    seurat <- NormalizeData(seurat)
 
     # plot 
     plotBubble(seurat_obj=seurat,
