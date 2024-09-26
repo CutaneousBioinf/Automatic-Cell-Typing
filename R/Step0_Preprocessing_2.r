@@ -85,169 +85,100 @@ cell_types_with_subtypes <- scrna_subset@meta.data %>%
   filter(subtype_count > 1)
 cell_types_with_subtypes
 
-# only T cells, Myeloid cells, and keratinocytes cells have subtypes
-keratinocytes_obj <- subset(scrna_subset, subset = `celltype.global` == "Keratinocytes")
-Keratinocytes_markers_subtype <- FindAllMarkers(keratinocytes_obj, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25, group.by = "celltype")
-# Extract the unique marker genes
-marker_genes <- unique(Keratinocytes_markers_subtype$gene)
-# Get the expression data (assay: RNA, slot: data)
-expression_matrix <- keratinocytes_obj@assays$RNA@data
-# Subset the expression matrix to include only marker genes
-expression_matrix_markers <- as.matrix(expression_matrix)
-expression_matrix_markers <- expression_matrix_markers[marker_genes,]
-# Extract cell type information
-cell_types <- keratinocytes_obj@meta.data$celltype
-# Create a matrix to store the bulk-level expression
-bulk_expression_matrix <- matrix(0, nrow = length(unique(cell_types)), ncol = length(marker_genes))
-rownames(bulk_expression_matrix) <- unique(cell_types)
-colnames(bulk_expression_matrix) <- marker_genes
-rownames(bulk_expression_matrix)[5] <- "Empty"
-# Aggregate expression data by cell type
-for (cell_type in unique(cell_types)) {
-  if(cell_type == ""){
-    cells_in_type <- which(cell_types == cell_type)
-    bulk_expression_matrix["Empty", ] <- rowMeans(expression_matrix_markers[, cells_in_type])
-  }
-  else{
-    cells_in_type <- which(cell_types == cell_type)
-    bulk_expression_matrix[cell_type, ] <- rowMeans(expression_matrix_markers[, cells_in_type])
-  }
-}
-# Convert to data frame for easier saving
-bulk_expression_df <- as.data.frame(bulk_expression_matrix)
-bulk_expression_df$celltype <- rownames(bulk_expression_matrix)
-# Reorder columns to have cell types as the first column
-bulk_expression_df <- bulk_expression_df %>%
-  select(celltype, everything())
-write.csv(bulk_expression_df, "subtype_keratinocyte_marker_expression_matrix.csv", row.names = TRUE)
 
 
 
-Myeloid_obj <- subset(scrna_subset, subset = `celltype.global` ==  "Myeloid Cells")
-Myeloid_obj <- subset(Myeloid_obj, cells = which(Myeloid_obj@meta.data$celltype != ""))
-Myeloid_obj@meta.data$celltype <- gsub(" ", "_", Myeloid_obj@meta.data$celltype)
-Myeloid_obj@meta.data$celltype <- gsub("-", "_", Myeloid_obj@meta.data$celltype)
-
-# Set the cell identities to the standardized celltype column
-Idents(Myeloid_obj) <- Myeloid_obj@meta.data$celltype
-
-# Verify the standardized levels (unique identities) in the object
-print(levels(Myeloid_obj))
-Myeloid_markers_subtype <- FindAllMarkers(Myeloid_obj, 
-                                          only.pos = TRUE, 
-                                          min.pct = 0.25, 
-                                          logfc.threshold = 0.25, 
-                                          group.by = "celltype")
 
 
-# Extract the unique marker genes
-marker_genes <- unique(Myeloid_markers_subtype$gene)
+generate_marker_gene_matrix(scrna, target_main_celltype){
+    T_obj <- subset(scrna_subset, subset = eval(parse(text = paste(main_celltype, "==" target_main_celltype))))
 
-# Get the expression data (assay: RNA, slot: data)
-expression_matrix <- Myeloid_obj@assays$RNA@data
+    T_obj <- subset(T_obj, cells = which(T_obj@meta.data[[sub_celltype]] != ""))
+    T_obj@meta.data[[sub_celltype]] <- gsub(" ", "_", T_obj@meta.data[[sub_celltype]])
+    T_obj@meta.data[[sub_celltype]] <- gsub("-", "_", T_obj@meta.data[[sub_celltype]])
+    Idents(T_obj) <- T_obj@meta.data[[sub_celltype]]
+    T_markers_subtype <- FindAllMarkers(T_obj, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25, group.by = sub_celltype)
 
-# Subset the expression matrix to include only marker genes
-expression_matrix_markers <- as.matrix(expression_matrix)
-expression_matrix_markers <- expression_matrix_markers[marker_genes,]
+    # Extract the unique marker genes
+    marker_genes <- unique(T_markers_subtype$gene)
 
-# Extract cell type information
-cell_types <- Myeloid_obj@meta.data$celltype
+    # Get the expression data (assay: RNA, slot: data)
+    expression_matrix <- T_obj@assays$RNA@data
 
-# Create a matrix to store the bulk-level expression
-bulk_expression_matrix <- matrix(0, nrow = length(unique(cell_types)), ncol = length(marker_genes))
-rownames(bulk_expression_matrix) <- unique(cell_types)
-colnames(bulk_expression_matrix) <- marker_genes
-# rownames(bulk_expression_matrix)[5] <- "Empty"
+    # Subset the expression matrix to include only marker genes
+    expression_matrix_markers <- as.matrix(expression_matrix)
+    expression_matrix_markers <- expression_matrix_markers[marker_genes,]
 
-# Aggregate expression data by cell type
-for (cell_type in unique(cell_types)) {
-  if(cell_type == ""){
-    cells_in_type <- which(cell_types == cell_type)
-    bulk_expression_matrix["Empty", ] <- rowMeans(expression_matrix_markers[, cells_in_type])
-  }
-  else{
-    cells_in_type <- which(cell_types == cell_type)
-    bulk_expression_matrix[cell_type, ] <- rowMeans(expression_matrix_markers[, cells_in_type])
-  }
+    # Extract cell type information
+    cell_types <- T_obj@meta.data[[sub_celltype]]
+
+    # Create a matrix to store the bulk-level expression
+    bulk_expression_matrix <- matrix(0, nrow = length(unique(cell_types)), ncol = length(marker_genes))
+    rownames(bulk_expression_matrix) <- unique(cell_types)
+    colnames(bulk_expression_matrix) <- marker_genes
+    # rownames(bulk_expression_matrix)[5] <- "Empty"
+
+    # Aggregate expression data by cell type
+    for (cell_type in unique(cell_types)) {
+    if(cell_type == ""){
+        cells_in_type <- which(cell_types == cell_type)
+        bulk_expression_matrix["Empty", ] <- rowMeans(expression_matrix_markers[, cells_in_type])
+    }
+    else{
+        cells_in_type <- which(cell_types == cell_type)
+        bulk_expression_matrix[cell_type, ] <- rowMeans(expression_matrix_markers[, cells_in_type])
+    }
+    }
+
+    # Convert to data frame for easier saving
+    bulk_expression_df <- as.data.frame(bulk_expression_matrix)
+    bulk_expression_df$celltype <- rownames(bulk_expression_matrix)
+
+    # Reorder columns to have cell types as the first column
+    bulk_expression_df <- bulk_expression_df %>%
+    select(celltype, everything())
+
+    exp_file_name1 = paste0("subtype_", target_main_celltype, "_marker_expression_matrix.csv")
+    write.csv(bulk_expression_df, exp_file_name1, row.names = TRUE)
+    # Count the occurrences of each gene
+    gene_counts <- table(T_markers_subtype$gene)
+    # Filter genes that occur more than once
+    filtered_genes <- names(gene_counts[gene_counts == 1])
+
+
+    bulk_expression_filter_df = bulk_expression_df[,filtered_genes]
+
+    exp_file_name2 = paste0("subtype_", target_main_celltype, "_marker_expression_filtered_matrix.csv")
+    write.csv(bulk_expression_filter_df, exp_file_name2, row.names = TRUE)
 }
 
-# Convert to data frame for easier saving
-bulk_expression_df <- as.data.frame(bulk_expression_matrix)
-bulk_expression_df$celltype <- rownames(bulk_expression_matrix)
-
-# Reorder columns to have cell types as the first column
-bulk_expression_df <- bulk_expression_df %>%
-  select(celltype, everything())
-
-write.csv(bulk_expression_df, "subtype_Myeloid_marker_expression_matrix.csv", row.names = TRUE)
 
 
+library(dplyr)
+main_celltype = "celltype.global"
+sub_celltype = "celltype"
+# unique(spatial@meta.data[[sub_celltype]])
 
-# Count the occurrences of each gene
-gene_counts <- table(Myeloid_markers_subtype$gene)
-# Filter genes that occur more than once
-filtered_genes <- names(gene_counts[gene_counts == 1])
+vec_main_celltype = spatial@meta.data[[main_celltype]]
+vec_sub_celltype = spatial@meta.data[[sub_celltype]]
 
-bulk_expression_filter_df = bulk_expression_df[,filtered_genes]
+data = data.frame(main_celltype = vec_main_celltype, sub_celltype = vec_sub_celltype)
+data[data == ""] <- NA
+data = na.omit(data)
+data = data[!duplicated(data),]
 
-write.csv(bulk_expression_filter_df, "subtype_Myeloid_marker_expression_filtered_matrix.csv", row.names = TRUE)
+result <- data %>%
+  group_by(main_celltype) %>%
+  summarise(sub_celltypes = paste(unique(sub_celltype), collapse = ", "))
 
 
 
-
-
-T_obj <- subset(scrna_subset, subset = `celltype.global` == "T Cells")
-T_obj <- subset(T_obj, cells = which(T_obj@meta.data$celltype != ""))
-T_obj@meta.data$celltype <- gsub(" ", "_", T_obj@meta.data$celltype)
-T_obj@meta.data$celltype <- gsub("-", "_", T_obj@meta.data$celltype)
-Idents(T_obj) <- T_obj@meta.data$celltype
-T_markers_subtype <- FindAllMarkers(T_obj, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25, group.by = "celltype")
-
-# Extract the unique marker genes
-marker_genes <- unique(T_markers_subtype$gene)
-
-# Get the expression data (assay: RNA, slot: data)
-expression_matrix <- T_obj@assays$RNA@data
-
-# Subset the expression matrix to include only marker genes
-expression_matrix_markers <- as.matrix(expression_matrix)
-expression_matrix_markers <- expression_matrix_markers[marker_genes,]
-
-# Extract cell type information
-cell_types <- T_obj@meta.data$celltype
-
-# Create a matrix to store the bulk-level expression
-bulk_expression_matrix <- matrix(0, nrow = length(unique(cell_types)), ncol = length(marker_genes))
-rownames(bulk_expression_matrix) <- unique(cell_types)
-colnames(bulk_expression_matrix) <- marker_genes
-# rownames(bulk_expression_matrix)[5] <- "Empty"
-
-# Aggregate expression data by cell type
-for (cell_type in unique(cell_types)) {
-  if(cell_type == ""){
-    cells_in_type <- which(cell_types == cell_type)
-    bulk_expression_matrix["Empty", ] <- rowMeans(expression_matrix_markers[, cells_in_type])
-  }
-  else{
-    cells_in_type <- which(cell_types == cell_type)
-    bulk_expression_matrix[cell_type, ] <- rowMeans(expression_matrix_markers[, cells_in_type])
+for (i in 1:nrow(result)){
+  vec_sub_celltype = unlist(strsplit(result$sub_celltypes[i], ", "))
+  if (length(vec_sub_celltype) > 1){
+    #print(i)
+    print(result$main_celltype[i])
+    #print(vec_sub_celltype)
+    generate_marker_gene_matrix(spatial, result$main_celltype[i])
   }
 }
-
-# Convert to data frame for easier saving
-bulk_expression_df <- as.data.frame(bulk_expression_matrix)
-bulk_expression_df$celltype <- rownames(bulk_expression_matrix)
-
-# Reorder columns to have cell types as the first column
-bulk_expression_df <- bulk_expression_df %>%
-  select(celltype, everything())
-
-write.csv(bulk_expression_df, "subtype_T_marker_expression_matrix.csv", row.names = TRUE)
-# Count the occurrences of each gene
-gene_counts <- table(T_markers_subtype$gene)
-# Filter genes that occur more than once
-filtered_genes <- names(gene_counts[gene_counts == 1])
-
-bulk_expression_filter_df = bulk_expression_df[,filtered_genes]
-
-write.csv(bulk_expression_filter_df, "subtype_T_marker_expression_filtered_matrix.csv", row.names = TRUE)
