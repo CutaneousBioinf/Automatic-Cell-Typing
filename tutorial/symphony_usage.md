@@ -37,4 +37,23 @@ Rscript ./xenium_symphony_pipeline.R ./xenium_symphony_example.config.R
 
 ## Dependencies
 
+If some libraries are missing, you can use these commands to install libraries in R.
+
+```R
+install.packages("Seurat")
+install.packages("symphony")
+install.packages("tibble")
+install.packages("dplyr")
+install.packages("irlba")
+install.packages("ggplot2")
+install.packages("ggthemes")
+install.packages("ggrastr")
+install.packages("RColorBrewer")
+install.packages("patchwork")
+install.packages("ggpubr")
+install.packages("cowplot")
+devtools::install_github('immunogenomics/singlecellmethods')
+devtools::install_github("drieslab/Giotto@suite")
+```
+
 ## Modify Configuration File
