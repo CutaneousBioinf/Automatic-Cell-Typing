@@ -117,7 +117,7 @@ Users can use their own codes, make sure that it generates these two variables:
 
 `ref_exp`: Expression matrix for references, gene x cell, log(CP10K + 1) normalized. 
 
-log(CP10K + 1) normalzation: for each count, calculate $ln(\frac{count}{total\ counts\ in\ the\ cell} \cdot 1000+1).$
+log(CP10K + 1) normalzation: for each count, calculate $ln(\frac{count}{total\ counts\ in\ the\ cell} \cdot 10000+1).$
 
 It is the defult normalization method of Seurat, but it is not the case for Giotto.
 
