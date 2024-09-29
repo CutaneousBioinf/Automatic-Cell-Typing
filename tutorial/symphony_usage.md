@@ -1,5 +1,10 @@
 # 2-Step Symphony Pipeline
 
+## Contents
+
+1. [Basic Usage](#Basic-Usage)
+2. [Dependencies](#Dependencies)
+3. [Configuration](#Configuration)
 
 
 ## Basic Usage
@@ -23,7 +28,7 @@ You can find two files in this folder:
 
 `xenium_symphony_example.config.R`: Configuration of 2-Step Symphony Pipeline
 
-To run the 2-Step Symphony Pipeline, modifiy the configuration file (see details below). Then use the command:
+To run the 2-Step Symphony Pipeline, modifiy the configuration file (see details [below](#Modify-Configuration)). Then use the command:
 
 ```bash
 Rscript ./xenium_symphony_pipeline.R {configuration_file}
@@ -35,7 +40,7 @@ Here, it is:
 Rscript ./xenium_symphony_pipeline.R ./xenium_symphony_example.config.R
 ```
 
-## Dependencies
+## Dependencies <a name="dependencies"></a>
 
 If some libraries are missing, you can use these commands to install libraries in R.
 
@@ -56,4 +61,40 @@ devtools::install_github('immunogenomics/singlecellmethods')
 devtools::install_github("drieslab/Giotto@suite")
 ```
 
-## Modify Configuration File
+## Configuration
+
+Current version of the pipeline requires users to manually modify the configuration file. The configuration file contains 3 parts.
+
+### Parameters
+
+Here are explanations of these parameters.
+
+`skip_build_ref_main`: Skip building references for main celltypes or not.
+
+`skip_build_ref_sub`: Skip building references for sub-celltypes or not.
+
+`maintype_col_name`: The name of the column representing main celltype in metadata.
+
+`subtype_col_name`: The name of the column representing sub-celltype in metadata.
+
+`downsample`: Use a subset of cells to build references or not.
+
+`downsample_to`: The number of cells in the subset. Ignore it when `downsample=FALSE`. 
+
+NOTICE: The pipeline first calculates `downsample_to` divided by total number of cells in the data for building reference. Then use the ratio to do downsampling for each sub-celltype. Therefore, the proportions of main celltypes and sub-celltypes will not change a lot after the downsampling, and the number of cells in the subset may not be exactly `downsample_to`. When building references for sub-celltypes, if the number of cells in the main celltype is larger than `downsample_to` and `downsample=TRUE`, it will also downsample the cells to `downsample_to`.
+
+`vars_use`: Column in meta_data that defines dataset for each cell. If meta_data is dataframe, this defined which variable(s) to remove (character vector).
+
+`save_main_ref_dir`: The path of the directory saving references for main celltypes.
+
+`save_main_uwot_dir`: The path of the directory saving uwot models for main celltypes.
+
+`save_sub_ref_dir`: The path of the directory saving references for sub-celltypes.
+
+`save_sub_uwot_dir`: The path of the directory saving uwot models for sub-celltypes.
+
+NOTICE: Each reference has an absolute path of corresponding uwot modle. If the location of a uwot mode changes, the reference cannot find it.
+
+`k`: The K of KNN. After projecting reference cells and queries, KNN is used to assign celltypes.
+
+`output_dir`: The path of the directory saving analyzing results.

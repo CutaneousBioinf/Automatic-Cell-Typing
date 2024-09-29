@@ -10,7 +10,7 @@ subtype_col_name = 'celltype'   # column in metadata representing sub celltype
 
 downsample = FALSE    # You may need downsampling when you have too many cells. If input is too large, it will cause an error in library Matrix.
 downsample_to = 10000  # The number of cells you want to keep. Final number may be slightly different. Ignore it when downsample=FALSE.
-vars_use = c('orig.ident') # Harmony parameter. If meta_data is dataframe, this defined which variable(s) to remove (character vector).
+vars_use = c('orig.ident') # Harmony parameter. Column in meta_data that defines dataset for each cell
 
 save_main_ref_dir = '/home/yulicai/symphony/mucosa/references'
 save_main_uwot_dir = save_main_ref_dir
@@ -19,7 +19,7 @@ save_sub_uwot_dir = save_sub_ref_dir
 
 k = 5   # the k of KNN in mapping.
 
-output_dir <- '/home/yulicai/symphony/mucosa/outputs'   # directory for saving mapping results
+output_dir <- '/home/yulicai/symphony/mucosa/outputs'   # directory for saving analyzing results
 
 
 
