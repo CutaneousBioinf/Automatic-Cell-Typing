@@ -55,7 +55,7 @@ ref_metadata = seurat_obj@meta.data
 
 
 
-########## Read Inputs For References ##########
+########## Read Inputs For Queries ##########
 
 ### If provide full paths of all cell_features_matrix.h5 file of the xenium data
 #query_paths <- as.matrix(read.table("xxxxx"))[,1]
@@ -76,6 +76,7 @@ seurat_obj <- CreateSeuratObject(giotto_object@expression$cell$rna$normalized@ex
 seurat_obj <- NormalizeData(seurat_obj)
 seurat_objs <- c()
 seurat_objs <- c(seurat_objs, seurat_obj)
+
 
 
 

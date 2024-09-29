@@ -6,6 +6,10 @@
 2. [Dependencies](#Dependencies)
 3. [Configuration](#Configuration)
 
+    1. [Parameters](#Parameters)
+    2. [Inputs For References](#inputs-for-references)
+    3. [Inputs For Queries](#inputs-for-queries)
+
 
 ## Basic Usage
 
@@ -75,7 +79,7 @@ Here are explanations of these parameters.
 
 `maintype_col_name`: The name of the column representing main celltype in metadata.
 
-`subtype_col_name`: The name of the column representing sub-celltype in metadata.
+`subtype_col_name`: The name of the column representing sub-celltype in metadata. If you only have main celltypes, set `subtype_col_name = maintype_col_name`.
 
 `downsample`: Use a subset of cells to build references or not.
 
@@ -93,8 +97,41 @@ NOTICE: The pipeline first calculates `downsample_to` divided by total number of
 
 `save_sub_uwot_dir`: The path of the directory saving uwot models for sub-celltypes.
 
-NOTICE: Each reference has an absolute path of corresponding uwot modle. If the location of a uwot mode changes, the reference cannot find it.
+NOTICE: Each reference has an absolute path of corresponding uwot modle. If the path of a uwot mode changes, the reference cannot find it.
 
 `k`: The K of KNN. After projecting reference cells and queries, KNN is used to assign celltypes.
 
 `output_dir`: The path of the directory saving analyzing results.
+
+### Inputs For References
+
+Here we provide some examples for reading inputs:
+
+1. A Giotto object.
+2. Expression matrix and metadata are provided seperately.
+3. A Seurat object.
+
+To use these examples, users only need to modify paths to inputs.
+
+Users can use their own codes, make sure that it generates these two variables:
+
+`ref_exp`: Expression matrix for references, gene x cell, log(CP10K + 1) normalized. 
+
+log(CP10K + 1) normalzation: for each count, calculate
+
+$$ln(\frac{count}{total\ counts\ in\ the\ cell} \cdot 1000+1).$$
+
+It is the defult normalization method of Seurat, but it is not the case for Giotto.
+
+`ref_metadata`: Metadata matrix for references, cell x feature, including main celltypes and sub-celltypes.
+
+### Inputs For Queries
+
+Here we provide some examples for reading inputs:
+
+1. Multiple h5 files.
+2. A Giotto object.
+
+Users can use their own codes, make sure that it generates this variable:
+
+`seurat_objs`: A list with one or multiple Seurat object(s).
