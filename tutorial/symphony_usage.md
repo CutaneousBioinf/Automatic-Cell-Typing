@@ -119,7 +119,7 @@ Users can use their own codes, make sure that it generates these two variables:
 
 log(CP10K + 1) normalzation: for each count, calculate $ln(\frac{count}{total\ counts\ in\ the\ cell} \cdot 10000+1).$
 
-It is the defult normalization method of Seurat, but it is not the case for Giotto.
+It is the defult normalization method of Seurat, but not for Giotto.
 
 `ref_metadata`: Metadata matrix for references, cell x feature, including main celltypes and sub-celltypes.
 
