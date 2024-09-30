@@ -73,7 +73,7 @@ ref_harmObj = harmony::HarmonyMatrix(
 )
 
 # Compress a Harmony object into a Symphony reference
-if (save_main_uwot_dir[1] != '/') {save_main_uwot_dir = paste(getwd(),'/',save_main_uwot_dir, sep='')}
+if (substring(save_main_uwot_dir,1,1) != '/') {save_main_uwot_dir = paste(getwd(),'/',save_main_uwot_dir, sep='')}
 reference = symphony::buildReferenceFromHarmonyObj(
                            ref_harmObj,            # output object from HarmonyMatrix()
                            ref_metadata,           # reference cell metadata
@@ -146,7 +146,7 @@ for (main_type in names(table(ref_metadata[,maintype_col_name]))){
 	)
 
 	# Compress a Harmony object into a Symphony reference
-    if (save_sub_uwot_dir[1] != '/') {save_sub_uwot_dir = paste(getwd(),'/',save_sub_uwot_dir, sep='')}
+    if (substring(save_sub_uwot_dir,1,1) != '/') {save_sub_uwot_dir = paste(getwd(),'/',save_sub_uwot_dir, sep='')}
 	reference = symphony::buildReferenceFromHarmonyObj(
 	                           ref_harmObj,            # output object from HarmonyMatrix()
 	                           ref_metadata_sub,           # reference cell metadata

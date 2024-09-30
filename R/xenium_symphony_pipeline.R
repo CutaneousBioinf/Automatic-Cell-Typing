@@ -16,7 +16,7 @@ library("irlba")
 
 
 ref_metadata_for_sub <- ref_metadata
-#ref_exp_for_sub <- ref_exp
+ref_exp_for_sub <- ref_exp
 ########## Build the Reference for Main Celltypes ##########
 if (skip_build_ref_main) {print('Skip building reference for main celltypes.')} else {
 print('Start building reference for main celltypes...')
@@ -30,14 +30,14 @@ print('Preprocessing...')
 # remove missing celltypes and downsample
 if (downsample) {
     ref_metadata <- ref_metadata %>% 
-                    filter(get(subtype_col_name) != '') %>% 
+                    #filter(get(subtype_col_name) != '') %>% 
                     rownames_to_column() %>% 
                     group_by(get(subtype_col_name)) %>% 
                     sample_frac(downsample_to/dim(ref_metadata)[1]) %>% 
                     column_to_rownames()
 } else {
     ref_metadata <- ref_metadata %>% 
-                    filter(get(subtype_col_name) != '') %>% 
+                    #filter(get(subtype_col_name) != '') %>% 
                     rownames_to_column() %>% 
                     column_to_rownames()
 }
@@ -73,6 +73,7 @@ ref_harmObj = harmony::HarmonyMatrix(
 )
 
 # Compress a Harmony object into a Symphony reference
+if (substring(save_main_uwot_dir,1,1) != '/') {save_main_uwot_dir = paste(getwd(),'/',save_main_uwot_dir, sep='')}
 reference = symphony::buildReferenceFromHarmonyObj(
                            ref_harmObj,            # output object from HarmonyMatrix()
                            ref_metadata,           # reference cell metadata
@@ -145,6 +146,7 @@ for (main_type in names(table(ref_metadata[,maintype_col_name]))){
 	)
 
 	# Compress a Harmony object into a Symphony reference
+    if (substring(save_sub_uwot_dir,1,1) != '/') {save_sub_uwot_dir = paste(getwd(),'/',save_sub_uwot_dir, sep='')}
 	reference = symphony::buildReferenceFromHarmonyObj(
 	                           ref_harmObj,            # output object from HarmonyMatrix()
 	                           ref_metadata_sub,           # reference cell metadata
