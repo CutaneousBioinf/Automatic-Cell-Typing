@@ -29,29 +29,29 @@ output_dir <- '/home/yulicai/symphony/mucosa/outputs'   # directory for saving a
 #library('Giotto')
 #giotto_object = readRDS('/home/alextsoi/Researches/Novartis_Xenium_LP/analysis_mucosa/gobj/gobject.RDS')
 #
-#giotto_object = normalizeGiotto(giotto_object, norm_methods = "standard", logbase=exp(1), scalefactor = 10000)
-#ref_exp = giotto_object@expression$cell$rna$normalized@exprMat
-#ref_metadata = giotto_object@cell_metadata$cell$rna@metaDTS
+#giotto_object = normalizeGiotto(giotto_object, norm_methods = "standard", logbase=exp(1), scalefactor = 10000, scale_genes = FALSE, scale_cells = FALSE)
+#ref_exp = giotto_object@norm_expr
+#ref_metadata = giotto_object@cell_metadata
 
 
 ## if provide expression matrix and metadata seperately
 ## Because reading whole scRNA data is time-consuming, I extract the required parts when testing my code.
-#ref_exp_path = '/home/yulicai/symphony/mucosa/mucosa_expr_raw.rds'
-#ref_metadata_path = '/home/yulicai/symphony/mucosa/mucosa_metadata.rds'
-#
-#ref_exp = readRDS(ref_exp_path)	
-#ref_metadata = readRDS(ref_metadata_path)
-## If the expression matric is raw counts, do normalization.
-#seurat_obj = CreateSeuratObject(ref_exp)
-#seurat_obj = NormalizeData(seurat_obj)     # log(CP10K + 1) normalization
+ref_exp_path = '/home/yulicai/symphony/mucosa/mucosa_expr_raw.rds'
+ref_metadata_path = '/home/yulicai/symphony/mucosa/mucosa_metadata.rds'
+
+ref_exp = readRDS(ref_exp_path)	
+ref_metadata = readRDS(ref_metadata_path)
+# If the expression matric is raw counts, do normalization.
+seurat_obj = CreateSeuratObject(ref_exp)
+seurat_obj = NormalizeData(seurat_obj)     # log(CP10K + 1) normalization
 
 
 ## if provide a seurat object directly
-seurat_obj = readRDS('/hits/wasikowr/Novartis/mucosa/seurat.RDS')
-
-seurat_obj = NormalizeData(seurat_obj)     # log(CP10K + 1) normalization
-ref_exp = seurat_obj$RNA@data    # gene x cell, should be log(CP10K + 1) normalized 
-ref_metadata = seurat_obj@meta.data
+#seurat_obj = readRDS('/hits/wasikowr/Novartis/mucosa/seurat.RDS')
+#
+#seurat_obj = NormalizeData(seurat_obj)     # log(CP10K + 1) normalization
+#ref_exp = seurat_obj$RNA@data    # gene x cell, should be log(CP10K + 1) normalized 
+#ref_metadata = seurat_obj@meta.data
 
 
 
@@ -73,6 +73,7 @@ ref_metadata = seurat_obj@meta.data
 library('Giotto')
 giotto_object <- readRDS('/home/yulicai/symphony/mucosa/data/gobject.RDS')
 seurat_obj <- CreateSeuratObject(giotto_object@expression$cell$rna$normalized@exprMat)
+#seurat_obj <- CreateSeuratObject(giotto_object@norm_expr)
 seurat_obj <- NormalizeData(seurat_obj)
 seurat_objs <- c()
 seurat_objs <- c(seurat_objs, seurat_obj)
