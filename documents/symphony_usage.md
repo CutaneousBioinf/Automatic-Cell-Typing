@@ -113,7 +113,7 @@ Here we provide some examples for reading inputs:
 
 To use these examples, users only need to modify paths to inputs.
 
-Users can use their own codes, make sure that it generates these two variables:
+Users can use their own code, make sure that it generates these two variables:
 
 `ref_exp`: Expression matrix for references, gene x cell, log(CP10K + 1) normalized. 
 
@@ -130,6 +130,6 @@ Here we provide some examples for reading inputs:
 1. Multiple h5 files.
 2. A Giotto object.
 
-Users can use their own codes, make sure that it generates this variable:
+Users can use their own code, make sure that it generates this variable:
 
 `seurat_objs`: A list with one or multiple Seurat object(s).
