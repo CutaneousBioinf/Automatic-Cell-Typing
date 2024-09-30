@@ -325,7 +325,7 @@ label_final <- bind_rows(label_main, sub_results)
 label_final$celltype.pred.combined <- as.factor(as.character(label_final$celltype.pred.combined))
 
 saveRDS(label_final, file=paste(output_dir, '/symphony_celltype_results.rds', sep=''))
-write.csv(label_final, file=paste(output_dir, '/symphony_celltype_results.rds', sep=''), row.names = FALSE)
+write.csv(label_final, file=paste(output_dir, '/symphony_celltype_results.csv', sep=''), row.names = FALSE)
 
 print(str(label_final))
 print(table(label_final$celltype.pred.combined))
