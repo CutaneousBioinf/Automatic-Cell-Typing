@@ -8,6 +8,20 @@ if (length(args)!=3) {
 results_folder = args[1]
 scRNA_path = args[2]
 giotto_object_path = args[3]
+
+setwd(results_folder)
+
+# load giotto object
+xenium_gobj = loadGiotto(giotto_object_path, reconnect_giottoImage=F) 
+instrs <- createGiottoInstructions(
+        save_dir = results_folder,
+        save_plot = TRUE,
+        show_plot = FALSE,
+        return_plot = FALSE,
+        python_path = python_path)
+
+xenium_gobj <- replaceGiottoInstructions(xenium_gobj, instructions = instrs)
+
     
 
 sub_celltype_insitutypeML <- function(cluster, sub_celltype){
@@ -75,7 +89,7 @@ sub_celltype_insitutypeML <- function(cluster, sub_celltype){
   # input 3: A "reference matrix" giving the expected expression profile of each cell type,
   # with genes in rows and cell types in columns. The reference matrix must be in linear-scale, not log-scale.
   temp.ref_mat <- list()
-  temp.sc <- as.matrix(read.table("/home/zhaixt/Xenium_Janssen_0715/data/global_ct_marker_expression_matrix.csv",row.names=1,header=T,sep=",",quote=NULL,comment.char="",check.names=F))
+  temp.sc <- as.matrix(read.table(scRNA_path,row.names=1,header=T,sep=",",quote=NULL,comment.char="",check.names=F))
   row.names(temp.sc)<- gsub("\"","",row.names(temp.sc) )
   colnames(temp.sc)<- gsub("\"","",colnames(temp.sc) )
   temp.sc = t(temp.sc)
