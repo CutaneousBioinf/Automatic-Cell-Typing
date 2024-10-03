@@ -1,4 +1,16 @@
- sub_celltype_insitutypeML <- function(cluster, sub_celltype){
+# parse input parameters from linux scripts
+args = commandArgs(trailingOnly=TRUE)
+
+if (length(args)!=3) {
+  stop("Please supply the results_folder, path of scRNA-seq reference csv file generated before, and giotto_object_path as command line arguments!", call.=FALSE)
+} 
+
+results_folder = args[1]
+scRNA_path = args[2]
+giotto_object_path = args[3]
+    
+
+sub_celltype_insitutypeML <- function(cluster, sub_celltype){
   #########subclustering for mixed main celltypes
   c = cluster
   temp <- subsetGiotto(xenium_gobj_updated, cell_ids=xenium_gobj_updated@cell_ID$cell[pDataDT(xenium_gobj_updated)$cell_type_majorvote==c])
