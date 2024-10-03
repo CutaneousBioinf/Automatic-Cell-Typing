@@ -4,13 +4,24 @@
 ###### Supervised cell typing using Insitutype ######
 library(InSituType)
 library(data.table)
+
+# parse input parameters from linux scripts
+args = commandArgs(trailingOnly=TRUE)
+
+if (length(args)!=3) {
+  stop("Please supply the results_folder, path of scRNA-seq reference csv file generated before, and giotto_object_path as command line arguments!", call.=FALSE)
+} 
+
+results_folder = args[1]
+scRNA_path = args[2]
+giotto_object_path = args[3]
     
 # set working directory
-results_folder = "/home/zhanh/Janssen_AD_xenium/results_jul29"
+# results_folder = "/home/zhanh/Janssen_AD_xenium/results_jul29"
 setwd(results_folder)
 
 # load giotto object
-xenium_gobj = loadGiotto("/home/zhanh/Janssen_AD_xenium/results/gobj", reconnect_giottoImage=F) 
+xenium_gobj = loadGiotto(giotto_object_path, reconnect_giottoImage=F) 
 instrs <- createGiottoInstructions(
         save_dir = results_folder,
         save_plot = TRUE,
@@ -81,7 +92,7 @@ temp.ref_mat <- list()
 ##########################################################
 ### temp.ref_mat[["ref.scRNA"]] <- as.matrix(read.table("~/db/Normal.Control.Skin.scRNA/control.skin_G.by.CellType.txt",row.names=1,header=T,sep="\t",quote=NULL,comment.char=""))
 # temp.ref_mat[["ref.scRNA"]] <- as.matrix(read.table("/home/zhanh/Xenium_psoriasis/test3/pso.skin_G.by.MainCellType.2.txt",row.names=1,header=T,sep="\t",quote=NULL,comment.char=""))
-temp.ref_mat[["ref.scRNA"]] <- as.matrix(read.csv("/home/zhanh/Janssen_AD_xenium/subtype_ct_DEgenes_exp.csv", row.names=1, header=TRUE, sep=",", quote=NULL, comment.char=""))
+temp.ref_mat[["ref.scRNA"]] <- as.matrix(read.csv(scRNA_path, row.names=1, header=TRUE, sep=",", quote=NULL, comment.char=""))
 row.names(temp.ref_mat[[1]]) <- gsub("\"", "", row.names(temp.ref_mat[[1]]))
 colnames(temp.ref_mat[[1]]) <- gsub("\"", "", colnames(temp.ref_mat[[1]]))
 
