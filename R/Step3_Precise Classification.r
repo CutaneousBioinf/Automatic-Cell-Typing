@@ -3,17 +3,15 @@ library(BASS)
 # parse input parameters from linux scripts
 args = commandArgs(trailingOnly=TRUE)
 
-if (length(args)!=3) {
-  stop("Please supply the results_folder, path of scRNA-seq sub reference csv file generated before, and giotto_object_path as command line arguments!", call.=FALSE)
+if (length(args)!=4) {
+  stop("Please supply the results_folder, path of scRNA-seq sub reference csv file generated before, giotto_object_path, and the target main celltype name as command line arguments!", call.=FALSE)
 } 
 
 results_folder = args[1]
 scRNA_sub_path = args[2]
 giotto_object_path = args[3]
-    
+target_main_celltype = args[4]
 
-# xenium_gobj=loadGiotto("/home/alextsoi/Researches/Xenium_skin_UMcustom.panel/analysis/gobj")
-# obj_ids = paste0("obj",1:length(xenium_folders))
 # psoriasis
 xenium_gobj = loadGiotto(giotto_object_path)
 
@@ -27,7 +25,7 @@ instrs = createGiottoInstructions(save_dir = results_folder,
 
 xenium_gobj = replaceGiottoInstructions(xenium_gobj, instructions = instrs)
 
-c1="Myeloid.Cells"
+c1=target_main_celltype
 # c2="T.Cells"
 # temp <- subsetGiotto(xenium_gobj, cell_ids=xenium_gobj@cell_ID$cell[(pDataDT(xenium_gobj)$cell_type_isML_updated==c1) | (pDataDT(xenium_gobj)$cell_type_isML_updated==c2)])
 temp <- subsetGiotto(xenium_gobj, cell_ids=xenium_gobj@cell_ID$cell[(pDataDT(xenium_gobj)$cell_type_isML_updated==c1)])
@@ -242,4 +240,4 @@ plotUMAP(gobject = xenium_gobj,
          save_param = list(save_name = '8.1_UMAP_M.sub.cell.types.updated_isML',base_width=15,base_height=12)
 )
 
-saveGiotto(xenium_gobj, save_dir = results_folder, save_name = "gobj_updated_0723")
+saveGiotto(xenium_gobj, save_dir = results_folder, save_name = "gobj_updated_final")
