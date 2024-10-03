@@ -4,13 +4,15 @@
 # parse input parameters from linux scripts
 args = commandArgs(trailingOnly=TRUE)
 
-if (length(args)!=3) {
-  stop("Please supply the results_folder, path of scRNA-seq RDS file and giotto_object_path for tiling as command line arguments!", call.=FALSE)
+if (length(args)!=5) {
+  stop("Please supply the results_folder, path of scRNA-seq RDS file, giotto_object_path, main_celltype name in scRNA-seq RDS file, and sub_celltype name in scRNA-seq RDS file as command line arguments!", call.=FALSE)
 } 
 
-results_folder <- args[1]
-scRNA_path <- args[2]
-giotto_object_path <- args[3]
+results_folder = args[1]
+scRNA_path = args[2]
+giotto_object_path = args[3]
+main_celltype = args[4]
+sub_celltype = args[5]
 
 ## Load the scRNA-seq reference data
 spatial = readRDS(scRNA_path)
@@ -155,8 +157,8 @@ generate_marker_gene_matrix(scrna, target_main_celltype){
 
 
 library(dplyr)
-main_celltype = "celltype.global"
-sub_celltype = "celltype"
+# main_celltype = "celltype.global"
+# sub_celltype = "celltype"
 # unique(spatial@meta.data[[sub_celltype]])
 
 vec_main_celltype = spatial@meta.data[[main_celltype]]
