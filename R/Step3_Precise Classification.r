@@ -1,14 +1,23 @@
 library(BASS)
 
-#xenium_gobj=loadGiotto("/home/alextsoi/Researches/Xenium_skin_UMcustom.panel/analysis/gobj")
-#obj_ids = paste0("obj",1:length(xenium_folders))
+# parse input parameters from linux scripts
+args = commandArgs(trailingOnly=TRUE)
+
+if (length(args)!=3) {
+  stop("Please supply the results_folder, path of scRNA-seq sub reference csv file generated before, and giotto_object_path as command line arguments!", call.=FALSE)
+} 
+
+results_folder = args[1]
+scRNA_sub_path = args[2]
+giotto_object_path = args[3]
+    
+
+# xenium_gobj=loadGiotto("/home/alextsoi/Researches/Xenium_skin_UMcustom.panel/analysis/gobj")
+# obj_ids = paste0("obj",1:length(xenium_folders))
 # psoriasis
-xenium_gobj = loadGiotto("/home/zhaixt/Xenium_Janssen_0715/gobj_updated_0719")
+xenium_gobj = loadGiotto(giotto_object_path)
 
 # set working directory
-#results_folder = '/path/to/save/directory/'
-#results_folder = getwd()
-results_folder = "/home/zhaixt/Xenium_Janssen_0715/"
 setwd(results_folder)
 
 instrs = createGiottoInstructions(save_dir = results_folder,
@@ -145,7 +154,7 @@ for (i in names(temp.exp_mat)){
 # input 3: A "reference matrix" giving the expected expression profile of each cell type,
 # with genes in rows and cell types in columns. The reference matrix must be in linear-scale, not log-scale.
 temp.ref_mat <- list()
-temp.sc <- as.matrix(read.table("/home/zhaixt/Myeloid Cells_subset.csv",row.names=1,header=T,sep=",",quote=NULL,comment.char="",check.names=F))
+temp.sc <- as.matrix(read.table(scRNA_sub_path,row.names=1,header=T,sep=",",quote=NULL,comment.char="",check.names=F))
 row.names(temp.sc) <- gsub("\"","",row.names(temp.sc) )
 colnames(temp.sc) <- gsub("\"","",colnames(temp.sc) )
   
