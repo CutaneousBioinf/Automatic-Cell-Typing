@@ -3,14 +3,15 @@ library(BASS)
 # parse input parameters from linux scripts
 args = commandArgs(trailingOnly=TRUE)
 
-if (length(args)!=4) {
-  stop("Please supply the results_folder, path of scRNA-seq sub reference csv file generated before, giotto_object_path, and the target main celltype name as command line arguments!", call.=FALSE)
+if (length(args)!=5) {
+  stop("Please supply the results_folder, path of scRNA-seq sub reference csv file generated before, giotto_object_path, the target main celltype name, and the variable name of main celltypes(default is the output of coarse classification) as command line arguments!", call.=FALSE)
 } 
 
 results_folder = args[1]
 scRNA_sub_path = args[2]
 giotto_object_path = args[3]
 target_main_celltype = args[4]
+variable_name = args[5]
 
 # psoriasis
 xenium_gobj = loadGiotto(giotto_object_path)
@@ -28,7 +29,7 @@ xenium_gobj = replaceGiottoInstructions(xenium_gobj, instructions = instrs)
 c1=target_main_celltype
 # c2="T.Cells"
 # temp <- subsetGiotto(xenium_gobj, cell_ids=xenium_gobj@cell_ID$cell[(pDataDT(xenium_gobj)$cell_type_isML_updated==c1) | (pDataDT(xenium_gobj)$cell_type_isML_updated==c2)])
-temp <- subsetGiotto(xenium_gobj, cell_ids=xenium_gobj@cell_ID$cell[(pDataDT(xenium_gobj)$cell_type_isML_updated==c1)])
+temp <- subsetGiotto(xenium_gobj, cell_ids=xenium_gobj@cell_ID$cell[(xenium_gobj@meta.data[[variable_name]]==c1)])
 
 
 # get cell info
