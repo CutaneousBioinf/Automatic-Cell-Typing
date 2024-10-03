@@ -2,6 +2,16 @@ library(dplyr)
 library(tidyr)
 library(data.table)
 
+# parse input parameters from linux scripts
+args = commandArgs(trailingOnly=TRUE)
+
+if (length(args)!=1) {
+  stop("Please supply the giotto_object_path as command line arguments!", call.=FALSE)
+} 
+
+giotto_object_path = args[1]
+    
+
 #### function of majority vote
 
 majority_vote <- function(gobj_path) {
@@ -114,7 +124,7 @@ majority_vote <- function(gobj_path) {
 }
 
 # example
-majority_vote("/home/zhanh/Janssen_AD_xenium/results_jul29/gobj")
+majority_vote(giotto_object_path)
 
 
 # Plot UMAP using the updated Giotto object
