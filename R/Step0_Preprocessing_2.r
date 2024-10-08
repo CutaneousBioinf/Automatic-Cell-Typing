@@ -92,8 +92,8 @@ cell_types_with_subtypes
 
 
 
-generate_marker_gene_matrix(scrna, target_main_celltype){
-    T_obj <- subset(scrna_subset, subset = eval(parse(text = paste(main_celltype, "==" target_main_celltype))))
+generate_marker_gene_matrix <- function(scrna, target_main_celltype){
+    T_obj <- subset(scrna_subset, subset = eval(parse(text = paste(main_celltype, "==", target_main_celltype))))
 
     T_obj <- subset(T_obj, cells = which(T_obj@meta.data[[sub_celltype]] != ""))
     T_obj@meta.data[[sub_celltype]] <- gsub(" ", "_", T_obj@meta.data[[sub_celltype]])
