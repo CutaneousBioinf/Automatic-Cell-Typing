@@ -263,13 +263,19 @@ plotBasic(cbind(query$meta_data, query$umap),
 ########## Predict Sub Celltype ##########
 print('Start working on sub celltypes.')
 celltypes_with_sub = list()
+celltypes_without_sub = list()
 for (main_type in names(table(reference_main$meta_data[,maintype_col_name]))){
 	ref_metadata_sub <- reference_main$meta_data %>% filter(get(maintype_col_name) == main_type) %>% filter(get(subtype_col_name) != '') %>% rownames_to_column() %>% column_to_rownames()
-	if (length(table(ref_metadata_sub[,subtype_col_name])) <= 1){next}
-    celltypes_with_sub[main_type] <- as.data.frame(names(table(ref_metadata_sub[,subtype_col_name])))
+	if (length(table(ref_metadata_sub[,subtype_col_name])) == 1){
+        celltypes_without_sub[main_type] <- names(table(ref_metadata_sub[,subtype_col_name]))[1]
+    } else{
+        celltypes_with_sub[main_type] <- as.data.frame(names(table(ref_metadata_sub[,subtype_col_name])))
+    }
 }
 print("Main celltypes with sub celltypes:")
 print(celltypes_with_sub)
+print("Main celltypes without sub celltypes:")
+print(celltypes_without_sub)
 
 # plot distribution of celltypes in reference space
 for (main_type in names(celltypes_with_sub)){
@@ -321,8 +327,14 @@ for (main_type in names(celltypes_with_sub)){
     }
 }
 
+## merge results
+# add umap location in main reference
 query$meta_data <- cbind(query$meta_data, query$umap)
+# process celltypes without subtype
 query$meta_data$celltype.pred.combined <- query$meta_data[,paste(maintype_col_name,'.pred',sep='')]
+for (main_type in names(celltypes_without_sub)){
+    query$meta_data$celltype.pred.combined <- replace(query$meta_data$celltype.pred.combined, query$meta_data$celltype.pred.combined==main_type, celltypes_without_sub[main_type])
+}
 label_main <- query$meta_data %>% filter(!(celltype.pred.combined %in% names(celltypes_with_sub)))
 print(str(label_main))
 label_final <- bind_rows(label_main, sub_results)

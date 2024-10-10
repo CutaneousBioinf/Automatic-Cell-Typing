@@ -1,4 +1,6 @@
-library('Seurat')
+library(Matrix, lib.loc="/home/alextsoi/R/R-4.4/lib/")
+library('Seurat',lib.loc="/home/alextsoi/R/R-4.4/lib/")
+library('Giotto')
 set.seed(0)
 
 ########## Parameters ##########
@@ -26,7 +28,6 @@ output_dir <- './outputs'   # directory for saving analyzing results
 ########## Read Inputs For References ##########
 
 ## if provide a giotto object directly
-library('Giotto')
 giotto_object = readRDS('./example_data/example_refer_giotto.rds')
 
 giotto_object = normalizeGiotto(giotto_object, norm_methods = "standard", logbase=exp(1), scalefactor = 10000, scale_genes = FALSE, scale_cells = FALSE)

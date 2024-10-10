@@ -1,4 +1,6 @@
-library('Seurat')
+library(Matrix, lib.loc="/home/alextsoi/R/R-4.4/lib/")
+library('Seurat',lib.loc="/home/alextsoi/R/R-4.4/lib/")
+library('Giotto',lib.loc="/home/alextsoi/R/R-4.4/lib/")
 set.seed(0)
 
 ########## Parameters ##########
