@@ -8,8 +8,9 @@ if (length(args) < 1) {
 source(args[1])
 
 ###################################################
-library('Seurat')
-library('symphony')
+library(Matrix, lib.loc="/home/alextsoi/R/R-4.4/lib/")
+library("Seurat",lib.loc="~/R/R-4.4/lib/")
+library('symphony',lib.loc="~/R/R-4.4/lib/")
 library('tibble')
 library('dplyr')
 library("irlba")
@@ -71,6 +72,8 @@ ref_harmObj = harmony::HarmonyMatrix(
         return_object = TRUE,     ## return the full Harmony model object
         do_pca = FALSE            ## don't recompute PCs
 )
+
+
 
 # Compress a Harmony object into a Symphony reference
 if (substring(save_main_uwot_dir,1,1) != '/') {save_main_uwot_dir = paste(getwd(),'/',save_main_uwot_dir, sep='')}
@@ -207,8 +210,9 @@ plotBasic <- function(umap_labels,                # metadata, with UMAP labels i
 }
 
 
-
-if (skip_build_ref_main) {print('Skip Mapping Queries.')} else {
+#####################################################################
+###     START MAPPING TARGET DATA
+print("start mapping query data...")
 ########## Predict Main Celltype ##########
 for (p in c(output_dir)) {
     if (!dir.exists(p)){
@@ -329,9 +333,9 @@ write.csv(label_final, file=paste(output_dir, '/symphony_celltype_results.csv', 
 
 print(str(label_final))
 print(table(label_final$celltype.pred.combined))
-}
 
 
+#############################################################################################
 ########## Draw Celltype Proportion ##########
 ref_metadata_cleaned <- ref_metadata_for_sub %>% filter(get(subtype_col_name) != '')
 label_final <- readRDS(paste(output_dir, '/symphony_celltype_results.rds', sep=''))
@@ -391,8 +395,8 @@ plotProp <- function(proportions,
     	labs(x = x_label, y = y_label) +
         guides(colour = guide_legend(override.aes = list(size = 4))) + guides(alpha = 'none')
     # add results of Spearman Corr.
-    p = add_sub(p, paste('Spearman Corr. =', spearman$estimate))
-    p = add_sub(p, paste('p =', spearman$p.value))
+    p = cowplot::add_sub(p, paste('Spearman Corr. =', spearman$estimate))
+    p = cowplot::add_sub(p, paste('p =', spearman$p.value))
 
     # save plot
     ggsave(save_path, plot=p, width=size[2], height=size[1])
