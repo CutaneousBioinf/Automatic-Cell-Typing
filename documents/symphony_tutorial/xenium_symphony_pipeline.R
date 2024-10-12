@@ -9,8 +9,8 @@ source(args[1])
 
 ###################################################
 library(Matrix, lib.loc="/home/alextsoi/R/R-4.4/lib/")
-library("Seurat",lib.loc="~/R/R-4.4/lib/")
-library('symphony',lib.loc="~/R/R-4.4/lib/")
+library("Seurat", lib.loc="/home/alextsoi/R/R-4.4/lib/")
+library('symphony', lib.loc="/home/alextsoi/R/R-4.4/lib/")
 library('tibble')
 library('dplyr')
 library("irlba")
@@ -170,14 +170,14 @@ for (main_type in names(table(ref_metadata[,maintype_col_name]))){
 
 
 ########## Set up Functions for plot ##########
-library(ggplot2)
+library(ggplot2, lib.loc="/home/alextsoi/R/R-4.4/lib/")
 library(ggthemes)
 library(ggrastr)
 library(RColorBrewer)
 library(patchwork)
 library(ggpubr)
-#library(Polychrome)
-library(cowplot)
+##library(Polychrome)
+library(cowplot, lib.loc="/home/alextsoi/R/R-4.4/lib/")
 
 plotBasic <- function(umap_labels,                # metadata, with UMAP labels in UMAP1 and UMAP2 slots
                       title = 'Query',         # Plot title
@@ -341,7 +341,7 @@ label_final <- bind_rows(label_main, sub_results)
 label_final$celltype.pred.combined <- as.factor(as.character(label_final$celltype.pred.combined))
 
 saveRDS(label_final, file=paste(output_dir, '/symphony_celltype_results.rds', sep=''))
-write.csv(label_final, file=paste(output_dir, '/symphony_celltype_results.csv', sep=''), row.names = FALSE)
+write.csv(label_final, file=paste(output_dir, '/symphony_celltype_results.csv', sep=''), row.names = TRUE)
 
 print(str(label_final))
 print(table(label_final$celltype.pred.combined))
@@ -361,6 +361,16 @@ for (p in c(output_dir)) {
 # frequences for reference and queries
 freq_refer <- as.data.frame(table(ref_metadata_cleaned[,maintype_col_name]))
 freq_query <- as.data.frame(table(label_final[,paste(maintype_col_name,'.pred',sep='')]))
+# add cell types with 0 counts
+freq_refer$Var1 <- as.character(freq_refer$Var1)
+freq_query$Var1 <- as.character(freq_query$Var1)
+for (celltype in freq_refer$Var1){
+    if (celltype %in% freq_query$Var1){next}
+    freq_query = rbind(freq_query, data.frame(Var1=c(celltype), Freq=c(0)))
+}
+freq_refer = freq_refer %>% arrange(Var1)
+freq_query = freq_query %>% arrange(Var1)
+
 proportions.main <- data.frame(col1=names(table(ref_metadata_cleaned[,maintype_col_name])),
                                col2=freq_refer$Freq,
                                col3=freq_query$Freq,
@@ -432,6 +442,16 @@ spearman.results <- data.frame(Item = c('Main Cell Types'),
 ## sub celltypes
 freq_refer <- as.data.frame(table(ref_metadata_cleaned[,subtype_col_name]))
 freq_query <- as.data.frame(table(label_final$celltype.pred.combined))
+# add cell types with 0 counts
+freq_refer$Var1 <- as.character(freq_refer$Var1)
+freq_query$Var1 <- as.character(freq_query$Var1)
+for (celltype in freq_refer$Var1){
+    if (celltype %in% freq_query$Var1){next}
+    freq_query = rbind(freq_query, data.frame(Var1=c(celltype), Freq=c(0)))
+}
+freq_refer = freq_refer %>% arrange(Var1)
+freq_query = freq_query %>% arrange(Var1)
+
 proportions.sub <- data.frame(col1=names(table(ref_metadata_cleaned[,subtype_col_name])),
                               col2=freq_refer$Freq,
                               col3=freq_query$Freq,
@@ -475,7 +495,6 @@ for (main_type in names(table(ref_metadata_cleaned[,maintype_col_name]))){
 }
 
 write.csv(spearman.results, file=paste(output_dir, '/5-celltype_proportion_spearman.csv', sep=''), row.names = FALSE)
-
 
 
 ########## Draw Bubble Plot ##########

@@ -1,6 +1,6 @@
 library(Matrix, lib.loc="/home/alextsoi/R/R-4.4/lib/")
 library('Seurat',lib.loc="/home/alextsoi/R/R-4.4/lib/")
-library('Giotto')
+library('Giotto',lib.loc="/home/alextsoi/R/R-4.4/lib/")
 set.seed(0)
 
 ########## Parameters ##########
@@ -28,11 +28,21 @@ output_dir <- './outputs'   # directory for saving analyzing results
 ########## Read Inputs For References ##########
 
 ## if provide a giotto object directly
-giotto_object = readRDS('./example_data/example_refer_giotto.rds')
 
-giotto_object = normalizeGiotto(giotto_object, norm_methods = "standard", logbase=exp(1), scalefactor = 10000, scale_genes = FALSE, scale_cells = FALSE)
-ref_exp = giotto_object@norm_expr
-ref_metadata = as.data.frame(giotto_object@cell_metadata)
+## This is for older Giotto version
+#giotto_object = readRDS('./example_data/example_refer_giotto.rds')
+#
+#giotto_object = normalizeGiotto(giotto_object, norm_methods = "standard", logbase=exp(1), scalefactor = 10000, scale_genes = FALSE, scale_cells = FALSE)
+#ref_exp = giotto_object@norm_expr
+#ref_metadata = as.data.frame(giotto_object@cell_metadata)
+#rownames(ref_metadata) = ref_metadata[,1]  # use first column as cell id
+
+# This is for newer Giotto version
+giotto_object = readRDS('./example_data/example_refer_giotto_v4.rds')
+
+giotto_object = normalizeGiotto(giotto_object, norm_methods = "standard", logbase=exp(1), scalefactor = 10000, scale_feats = FALSE, scale_cells = FALSE)
+ref_exp = giotto_object@expression$cell$rna$normalized@exprMat
+ref_metadata = as.data.frame(giotto_object@cell_metadata$cell$rna@metaDT)
 rownames(ref_metadata) = ref_metadata[,1]  # use first column as cell id
 
 
@@ -70,9 +80,9 @@ rownames(ref_metadata) = ref_metadata[,1]  # use first column as cell id
 
 
 ## If provide a giotto object
-library('Giotto')
-giotto_object <- readRDS('./example_data/example_refer_giotto.rds')
-seurat_obj <- CreateSeuratObject(giotto_object@raw_exprs)
+giotto_object <- readRDS('./example_data/example_refer_giotto_v4.rds')
+#seurat_obj <- CreateSeuratObject(giotto_object@raw_exprs)   # This is for older Giotto version
+seurat_obj <- CreateSeuratObject(as.data.frame(giotto_object@expression$cell$rna$raw@exprMat))    # This is for newer Giotto version (tested for v4.1.0)
 seurat_obj <- NormalizeData(seurat_obj)
 seurat_objs <- c()
 seurat_objs <- c(seurat_objs, seurat_obj)
