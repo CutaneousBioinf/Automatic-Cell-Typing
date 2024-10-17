@@ -103,7 +103,7 @@ print(table(ref_metadata[,maintype_col_name]))
 for (main_type in names(table(ref_metadata[,maintype_col_name]))){
 	print(paste('Start building reference for', main_type, '...'))
     ref_metadata_sub <- ref_metadata_for_sub %>%    # notice: here is not the processed data in last step
-                        filter(get(subtype_col_name) != '') %>% 
+                        #filter(get(subtype_col_name) != '') %>% 
                         filter(get(maintype_col_name) == main_type)
 	if (length(table(ref_metadata_sub[,subtype_col_name])) <= 1){
 		print('No subtype found. Skip.')
@@ -265,7 +265,10 @@ print('Start working on sub celltypes.')
 celltypes_with_sub = list()
 celltypes_without_sub = list()
 for (main_type in names(table(reference_main$meta_data[,maintype_col_name]))){
-	ref_metadata_sub <- reference_main$meta_data %>% filter(get(maintype_col_name) == main_type) %>% filter(get(subtype_col_name) != '') %>% rownames_to_column() %>% column_to_rownames()
+	ref_metadata_sub <- reference_main$meta_data %>% 
+                        filter(get(maintype_col_name) == main_type) %>% 
+                        #filter(get(subtype_col_name) != '') %>% 
+                        rownames_to_column() %>% column_to_rownames()
 	if (length(table(ref_metadata_sub[,subtype_col_name])) == 1){
         celltypes_without_sub[main_type] <- names(table(ref_metadata_sub[,subtype_col_name]))[1]
     } else{
@@ -349,7 +352,7 @@ print(table(label_final$celltype.pred.combined))
 
 #############################################################################################
 ########## Draw Celltype Proportion ##########
-ref_metadata_cleaned <- ref_metadata_for_sub %>% filter(get(subtype_col_name) != '')
+ref_metadata_cleaned <- ref_metadata_for_sub #%>% filter(get(subtype_col_name) != '')
 label_final <- readRDS(paste(output_dir, '/symphony_celltype_results.rds', sep=''))
 
 for (p in c(output_dir)) {
@@ -478,7 +481,7 @@ spearman.results <- rbind(spearman.results, list('All Sub-celltypes', spearman$e
 # plot by main celltypes
 for (main_type in names(table(ref_metadata_cleaned[,maintype_col_name]))){
     # choose cells only in this main celltype form the metadata
-    ref_metadata_sub <- ref_metadata_cleaned %>% filter(get(maintype_col_name) == main_type) %>% filter(get(subtype_col_name) != '') 
+    ref_metadata_sub <- ref_metadata_cleaned %>% filter(get(maintype_col_name) == main_type) #%>% filter(get(subtype_col_name) != '') 
     # check number of sub celltype, if <= 1, skip it.
     if (length(table(ref_metadata_sub[,subtype_col_name])) <= 1){next}
 	
@@ -577,8 +580,8 @@ count <- count[,subtype$cellid]
 for (main_type in names(table(label_final[,paste(maintype_col_name,'.pred',sep='')]))){
     # choose cells only in this main celltype form the metadata
     label_final_sub <- label_final %>% 
-                       filter(get(paste(maintype_col_name,'.pred',sep='')) == main_type) %>% 
-                       filter(celltype.pred.combined != '') 
+                       filter(get(paste(maintype_col_name,'.pred',sep='')) == main_type) #%>% 
+                       #filter(celltype.pred.combined != '') 
     label_final_sub$celltype.pred.combined <- as.character(label_final_sub$celltype.pred.combined)
     # check number of sub celltype, if <= 1, skip it.
     if (length(table(label_final_sub$celltype.pred.combined)) <= 1){next}
