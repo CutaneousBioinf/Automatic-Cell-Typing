@@ -1,7 +1,7 @@
 # parse input parameters from linux scripts
 args = commandArgs(trailingOnly=TRUE)
 
-if (length(args)!=5) {
+if (length(args)!=2) {
   stop("Please supply the results_folder, giotto_object_path!", call.=FALSE)
 } 
 
