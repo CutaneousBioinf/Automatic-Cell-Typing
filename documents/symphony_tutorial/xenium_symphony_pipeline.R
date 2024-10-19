@@ -455,7 +455,7 @@ for (celltype in freq_refer$Var1){
 freq_refer = freq_refer %>% arrange(Var1)
 freq_query = freq_query %>% arrange(Var1)
 
-proportions.sub <- data.frame(col1=names(table(ref_metadata_cleaned[,subtype_col_name])),
+proportions.sub <- data.frame(col1=freq_refer$Var1,
                               col2=freq_refer$Freq,
                               col3=freq_query$Freq,
                               col4=freq_refer$Freq/sum(freq_refer$Freq),
