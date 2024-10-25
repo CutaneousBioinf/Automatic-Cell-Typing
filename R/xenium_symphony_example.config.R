@@ -56,6 +56,7 @@ ref_metadata = readRDS(ref_metadata_path)
 # If the expression matric is raw counts, do normalization.
 seurat_obj = CreateSeuratObject(ref_exp)
 seurat_obj = NormalizeData(seurat_obj)     # log(CP10K + 1) normalization
+ref_exp = seurat_obj$RNA$data    # gene x cell, should be log(CP10K + 1) normalized 
 
 
 ## if provide a seurat object directly
