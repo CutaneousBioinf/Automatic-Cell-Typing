@@ -55,7 +55,7 @@ rownames(ref_metadata) = ref_metadata[,1]  # use first column as cell id
 ## If the expression matric is raw counts, do normalization.
 #seurat_obj = CreateSeuratObject(ref_exp)
 #seurat_obj = NormalizeData(seurat_obj)     # log(CP10K + 1) normalization
-
+#ref_exp = seurat_obj$RNA$data
 
 ## if provide a seurat object directly
 #seurat_obj = readRDS('')

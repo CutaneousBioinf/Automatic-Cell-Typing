@@ -176,7 +176,7 @@ library(ggrastr)
 library(RColorBrewer)
 library(patchwork)
 library(ggpubr)
-##library(Polychrome)
+library(Polychrome)
 library(cowplot, lib.loc="/home/alextsoi/R/R-4.4/lib/")
 
 plotBasic <- function(umap_labels,                # metadata, with UMAP labels in UMAP1 and UMAP2 slots
@@ -189,10 +189,11 @@ plotBasic <- function(umap_labels,                # metadata, with UMAP labels i
                       size = c(8,10)) {  
     
     p = umap_labels %>%
-            #dplyr::sample_frac(1L) %>% # permute rows randomly
+            dplyr::sample_frac(1L) %>% # permute rows randomly
             ggplot(aes(x = UMAP1, y = UMAP2)) + 
             geom_point_rast(aes(col = get(color.by)), size = 0.3, stroke = 0.2, shape = 16)
-        if (!is.null(color.mapping)) { p = p + scale_color_manual(values = color.mapping) }
+
+    if (!is.null(color.mapping)) { p = p + scale_color_manual(values = color.mapping) }
     
     # Default formatting
     p = p + theme_bw() +
@@ -208,6 +209,16 @@ plotBasic <- function(umap_labels,                # metadata, with UMAP labels i
     
     ggsave(save_path, plot=p, width=size[2], height=size[1])
 }
+
+# to make colors more distinct
+# for main celltypes
+main.names <- names(table(ref_metadata[maintype_col_name]))
+color.mapping.main <- createPalette(length(main.names),  c("#ff0000", "#00ff00", "#0000ff"))
+names(color.mapping.main) <- main.names
+# for sub celltypes
+sub.names <- names(table(ref_metadata[subtype_col_name]))
+color.mapping.sub <- createPalette(length(sub.names),  c("#ff0000", "#00ff00", "#0000ff"))
+names(color.mapping.sub) <- sub.names
 
 
 #####################################################################
@@ -229,6 +240,7 @@ reference_main <- readRDS(paste(save_main_ref_dir, '/ref_main.rds', sep=''))
 plotBasic(cbind(reference_main$meta_data, reference_main$umap$embedding), 
           title = 'Reference Cells in Reference UMAP Space of Main celltypes', 
           color.by = maintype_col_name,
+          color.mapping = color.mapping.main,
           save_path = paste(output_dir, '/1-main_celltype_refer.png', sep=''),
           size = c(8,10))
 #plotBasic(cbind(reference_main$meta_data, reference_main$umap$embedding), 
@@ -257,6 +269,7 @@ plotBasic(cbind(query$meta_data, query$umap),
           title = 'Query Cells in Reference UMAP Space', 
           color.by = paste(maintype_col_name,'.pred',sep=''),
           save_path = paste(output_dir, '/2-main_celltype_pred.png', sep=''),
+          color.mapping = color.mapping.main,
           size = c(8,10))
 
 
@@ -291,6 +304,7 @@ for (main_type in names(celltypes_with_sub)){
     plotBasic(cbind(reference_sub$meta_data, reference_sub$umap$embedding), 
               title = paste('Reference Cells in Reference UMAP Space of', main_type), 
               color.by = subtype_col_name,
+              color.mapping = color.mapping.sub,
               save_path = paste(output_dir, '/3-sub_celltype_refer_',gsub(' ','-',main_type),'.png', sep=''),
               size = c(8,10))
 }
@@ -317,6 +331,7 @@ for (main_type in names(celltypes_with_sub)){
     plotBasic(umap_combined_labels, 
               title = paste('Query Cells in Reference UMAP Space of', main_type), 
               color.by = paste(main_type,'.pred',sep=''),
+              color.mapping = color.mapping.sub,
               save_path = paste(output_dir, '/4-sub_celltype_pred_',gsub(' ','-',main_type),'.png', sep=''),
               size = c(8,10))
     query_sub$meta_data$celltype.pred.combined <- query_sub$meta_data[,paste(main_type,'.pred',sep='')]
@@ -435,6 +450,7 @@ spearman <- plotProp(proportions = proportions.main,
                      celltype_col_name = paste(maintype_col_name),
                      x_col_name = paste(maintype_col_name,'.prop.pred',sep=''),
                      y_col_name = paste(maintype_col_name,'.prop.refer',sep=''),
+                     color.mapping = color.mapping.main,
                      save_path = paste(output_dir, '/5-celltype_proportion_main.png', sep=''))
 # record spearman correlation
 spearman.results <- data.frame(Item = c('Main Cell Types'),
@@ -473,6 +489,7 @@ spearman <- plotProp(proportions = proportions.sub,
                      celltype_col_name = paste(subtype_col_name),
                      x_col_name = paste(subtype_col_name,'.prop.pred',sep=''),
                      y_col_name = paste(subtype_col_name,'.prop.refer',sep=''),
+                     color.mapping = color.mapping.sub,
                      save_path = paste(output_dir, '/5-celltype_proportion_sub_all.png', sep=''))
 # record spearman correlation
 spearman.results <- rbind(spearman.results, list('All Sub-celltypes', spearman$estimate, spearman$p.value))
@@ -493,6 +510,7 @@ for (main_type in names(table(ref_metadata_cleaned[,maintype_col_name]))){
                         x_col_name = paste(subtype_col_name,'.prop.pred',sep=''),
                         y_col_name = paste(subtype_col_name,'.prop.refer',sep=''),
                         title = paste('Proportions of Subtypes of', main_type), 
+                        color.mapping = color.mapping.sub,
                         save_path = paste(output_dir, '/5-celltype_proportion_sub_',gsub(' ','-',main_type),'.png', sep=''))
     spearman.results <- rbind(spearman.results, list(main_type, spearman$estimate, spearman$p.value))
 }
