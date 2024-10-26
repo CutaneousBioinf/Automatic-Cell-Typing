@@ -17,8 +17,8 @@ library("irlba")
 
 
 ref_metadata <- ref_metadata %>% 
-                filter(get(maintype_col_name) %in% remove_maintype) %>% 
-                filter(get(subtype_col_name) %in% remove_subtype)
+                filter(!(get(maintype_col_name) %in% remove_maintype)) %>% 
+                filter(!(get(subtype_col_name) %in% remove_subtype))
 ref_exp <- ref_exp[,rownames(ref_metadata)]
 
 ref_metadata_for_sub <- ref_metadata
