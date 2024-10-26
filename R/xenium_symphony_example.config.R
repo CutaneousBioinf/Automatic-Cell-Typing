@@ -10,6 +10,9 @@ skip_build_ref_sub = FALSE
 maintype_col_name = 'celltype'  # column in metadata representing main celltype
 subtype_col_name = 'celltype'   # column in metadata representing sub celltype
 
+remove_maintype = c()   # You may want to exclude some celltypes, like missing celltypes. If not, leave it empty, c(). 
+remove_subtype = c('')    # It happens at the very beginning, before downsampling and calculating cell proportions. 
+
 downsample = FALSE    # You may need downsampling when you have too many cells. If input is too large, it will cause an error in library Matrix.
 downsample_to = 10000  # The number of cells you want to keep. Final number may be slightly different. Ignore it when downsample=FALSE.
 vars_use = c('orig.ident') # Covariants to remove
