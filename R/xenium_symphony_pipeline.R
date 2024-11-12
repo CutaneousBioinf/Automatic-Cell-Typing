@@ -287,7 +287,7 @@ for (main_type in names(table(reference_main$meta_data[,maintype_col_name]))){
                         filter(get(maintype_col_name) == main_type) %>% 
                         #filter(get(subtype_col_name) != '') %>% 
                         rownames_to_column() %>% column_to_rownames()
-	if (length(table(ref_metadata_sub[,subtype_col_name])) == 1){
+	if (length(table(ref_metadata_sub[,subtype_col_name])) <= 1){
         celltypes_without_sub[main_type] <- names(table(ref_metadata_sub[,subtype_col_name]))[1]
     } else{
         celltypes_with_sub[main_type] <- as.data.frame(names(table(ref_metadata_sub[,subtype_col_name])))
