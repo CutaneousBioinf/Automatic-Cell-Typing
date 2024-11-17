@@ -62,7 +62,7 @@ ref_exp_scaled = singlecellmethods::scaleDataWithStats(ref_exp, genes_means_sds$
 
 # Run SVD, save gene loadings (s$u)
 print('Running SVD...')
-s = irlba(ref_exp_scaled, nv = 20, fastpath=FALSE)
+s = irlba(ref_exp_scaled, nv = num_PC, fastpath=FALSE)
 Z_pca_ref = diag(s$d) %*% t(s$v) # [pcs by cells]
 loadings = s$u
 
@@ -70,12 +70,13 @@ loadings = s$u
 ref_harmObj = harmony::HarmonyMatrix(
         data_mat = t(Z_pca_ref),  ## PCA embedding matrix of cells
         meta_data = ref_metadata, ## dataframe with cell labels
-        theta = c(2),             ## cluster diversity enforcement
+        theta = theta,             ## cluster diversity enforcement
         vars_use = vars_use,    ## variable to integrate out
         nclust = 100,             ## number of clusters in Harmony model
         max.iter.harmony = 20,
         return_object = TRUE,     ## return the full Harmony model object
-        do_pca = FALSE            ## don't recompute PCs
+        do_pca = FALSE,            ## don't recompute PCs
+        npcs = num_PC
 )
 
 
@@ -137,7 +138,7 @@ for (main_type in names(table(ref_metadata[,maintype_col_name]))){
 
 	# Run SVD, save gene loadings (s$u)
 	print('Running SVD...')
-	s = irlba(ref_exp_scaled, nv = 20, fastpath=FALSE)
+	s = irlba(ref_exp_scaled, nv = num_PC, fastpath=FALSE)
 	Z_pca_ref = diag(s$d) %*% t(s$v) # [pcs by cells]
 	loadings = s$u
 
@@ -145,12 +146,13 @@ for (main_type in names(table(ref_metadata[,maintype_col_name]))){
 	ref_harmObj = harmony::HarmonyMatrix(
 	        data_mat = t(Z_pca_ref),  ## PCA embedding matrix of cells
 	        meta_data = ref_metadata_sub, ## dataframe with cell labels
-	        theta = c(2),             ## cluster diversity enforcement
+	        theta = theta,             ## cluster diversity enforcement
 	        vars_use = vars_use,    ## variable to integrate out
 	        nclust = 100,             ## number of clusters in Harmony model
 	        max.iter.harmony = 20,
 	        return_object = TRUE,     ## return the full Harmony model object
-	        do_pca = FALSE            ## don't recompute PCs
+	        do_pca = FALSE,            ## don't recompute PCs
+            npcs = num_PC
 	)
 
 	# Compress a Harmony object into a Symphony reference
