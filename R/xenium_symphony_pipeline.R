@@ -1,3 +1,4 @@
+### symphony for annotating xenium data given scRNA reference's main/subtypes
 args <- commandArgs(trailingOnly = TRUE)
 
 if (length(args) < 1) {
