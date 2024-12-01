@@ -24,7 +24,7 @@ save_main_uwot_dir = save_main_ref_dir
 save_sub_ref_dir = '/home/yulicai/symphony/mucosa/references'
 save_sub_uwot_dir = save_sub_ref_dir
 
-k = 5   # the k of KNN in mapping.
+k = 50   # the k of KNN in mapping.
 
 output_dir <- '/home/yulicai/symphony/mucosa/outputs'   # directory for saving analyzing results
 
