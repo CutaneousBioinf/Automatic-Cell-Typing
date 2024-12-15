@@ -17,7 +17,7 @@ remove_subtype = c('')    # It happens at the very beginning, before downsamplin
 
 downsample = TRUE    # You may need downsampling when you have too many cells. If input is too large, it will cause an error in library Matrix.
 downsample_to = 100000  # The number of cells you want to keep. Final number may be slightly different. Ignore it when downsample=FALSE.
-vars_use = c('sample') # Covariants to remove in harmony
+vars_use = c('sample') # Covariants in reference to remove in harmony
 num_PC = 40     # The number of principle components used to build references. Default=20
 theta = c(2)   # Diversity clustering penalty parameter. Specify for each variable in vars_use Default theta=2. theta=0 does not encourage any diversity. Larger theta results in more diverse clusters.
 
