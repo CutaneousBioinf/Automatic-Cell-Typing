@@ -8,6 +8,8 @@ skip_build_ref_main = FALSE
 skip_build_ref_sub = FALSE
 
 VariableToGroup="sample" ### variable in the metadata to group in symphony variable selection step
+variableTointegrateover.query="sample_ID" ### variable in query to integrate over for mapquery
+
 
 maintype_col_name = 'cell2'  # column in metadata representing main celltype
 subtype_col_name = 'celltype'   # column in metadata representing sub celltype
@@ -95,12 +97,11 @@ ref_metadata = seurat_obj@meta.data
 
 giotto_object <- loadGiotto("/home/hhzhang/xenium_5k/kidney/20240724__224332/gobj",reconnect_giottoImage=F)
 
-seurat_obj <- CreateSeuratObject(as.data.frame(giotto_object@expression$cell$rna$raw@exprMat))    # This is for newer Giotto version (tested for v4.1.0)
+seurat_obj <- CreateSeuratObject(as.data.frame(giotto_object@expression$cell$rna$raw@exprMat), meta.data=as.data.frame(pDataDT(giotto_object)))    # This is for newer Giotto version (tested for v4.1.0)
 #seurat_obj <- CreateSeuratObject(giotto_object@norm_expr)
 seurat_obj <- NormalizeData(seurat_obj)
 seurat_objs <- c()
 seurat_objs <- c(seurat_objs, seurat_obj)
-
 
 if (length(seurat_objs)>1) {
     seurat_merged <- merge(seurat_objs[[1]], y=seurat_objs[2:length(seurat_objs)], add.cell.ids=paste('obj',as.character(c(1:length(seurat_objs))),sep=''))
