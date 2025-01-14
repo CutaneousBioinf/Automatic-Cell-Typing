@@ -48,14 +48,12 @@ print('Preprocessing...')
 # remove missing celltypes and downsample
 if (downsample) {
     ref_metadata <- ref_metadata %>% 
-                    #filter(get(subtype_col_name) != '') %>% 
                     rownames_to_column() %>% 
                     group_by(get(subtype_col_name)) %>% 
                     sample_frac(downsample_to/dim(ref_metadata)[1]) %>% 
                     column_to_rownames()
 } else {
     ref_metadata <- ref_metadata %>% 
-                    #filter(get(subtype_col_name) != '') %>% 
                     rownames_to_column() %>% 
                     column_to_rownames()
 }
@@ -120,9 +118,10 @@ print(table(ref_metadata[,maintype_col_name]))
 for (main_type in names(table(ref_metadata[,maintype_col_name]))){
     print(paste('Start building reference for', main_type, '...'))
     ref_metadata_sub <- ref_metadata_for_sub %>%    # notice: here is not the processed data in last step
-                        #filter(get(subtype_col_name) != '') %>% 
                         filter(get(maintype_col_name) == main_type)
-    if (length(table(ref_metadata_sub[,subtype_col_name])) <= 1){
+    ref_metadata_sub[subtype_col_name] <- droplevels(ref_metadata_sub[subtype_col_name])
+    print(table(ref_metadata_sub[,subtype_col_name]))
+    if (length(table(ref_metadata_sub[,subtype_col_name])) <= 1){       
         print('No subtype found. Skip.')
         next
     }
@@ -285,7 +284,6 @@ query = mapQuery(query_exp,             # query gene expression (genes x cells)
                 do_normalize = FALSE,  # perform log(CP10k+1) normalization on query
                 do_umap = TRUE,        # project query cells into reference UMAP
                 vars=variableTointegrateover.query) ### query batch variable to integrate over
-
 query = knnPredict(query, 
                 reference_main, 
                 reference_main$meta_data[,maintype_col_name], 
@@ -316,8 +314,8 @@ celltypes_without_sub = list()
 for (main_type in names(table(reference_main$meta_data[,maintype_col_name]))){
     ref_metadata_sub <- reference_main$meta_data %>% 
                         filter(get(maintype_col_name) == main_type) %>% 
-                        #filter(get(subtype_col_name) != '') %>% 
                         rownames_to_column() %>% column_to_rownames()
+    ref_metadata_sub[subtype_col_name] <- droplevels(ref_metadata_sub[subtype_col_name])
     if (length(table(ref_metadata_sub[,subtype_col_name])) <= 1){
         celltypes_without_sub[main_type] <- names(table(ref_metadata_sub[,subtype_col_name]))[1]
     } else{
@@ -537,12 +535,15 @@ spearman.results <- rbind(spearman.results, list('All Sub-celltypes', spearman$e
 # plot by main celltypes
 for (main_type in names(table(ref_metadata_cleaned[,maintype_col_name]))){
     # choose cells only in this main celltype form the metadata
-    ref_metadata_sub <- ref_metadata_cleaned %>% filter(get(maintype_col_name) == main_type) #%>% filter(get(subtype_col_name) != '') 
+    ref_metadata_sub <- ref_metadata_cleaned %>% filter(get(maintype_col_name) == main_type)
+    ref_metadata_sub[subtype_col_name] <- droplevels(ref_metadata_sub[subtype_col_name])
     # check number of sub celltype, if <= 1, skip it.
     if (length(table(ref_metadata_sub[,subtype_col_name])) <= 1){next}
     
     # choose proportions of subtypes within the main celltypes
     subgroup = proportions.sub %>% filter(get(subtype_col_name) %in% names(table(ref_metadata_sub[,subtype_col_name])))
+    print(paste('Working on ', main_type))
+    print(str(subgroup))
     # plot and calculate spearman correlation
     spearman <-plotProp(proportions = subgroup,
                         celltype_col_name = paste(subtype_col_name),
