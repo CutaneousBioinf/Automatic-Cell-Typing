@@ -29,6 +29,7 @@ save_sub_ref_dir = '/home/alextsoi/Researches/AMP_Xenium_5kpanel/kidney/Early_Di
 save_sub_uwot_dir = save_sub_ref_dir
 
 k = 50   # the k of KNN in mapping.
+knn_on_umap = TRUE  # Do KNN on UMAP coordinates rather than Symphony embedding.
 
 output_dir <- '/home/alextsoi/Researches/AMP_Xenium_5kpanel/kidney/Early_Disease/20240724__224332_20240812__180808/analysis/Symphony_test/20240724__224332'   # directory for saving analyzing results
 

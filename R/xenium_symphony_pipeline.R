@@ -274,6 +274,23 @@ plotBasic(cbind(reference_main$meta_data, reference_main$umap$embedding),
 #          size = c(8,10.5))
 
 
+knnPredictUMAP <- function(query_obj, ref_obj,
+                       train_labels,                   # cell labels for k-NN classification 
+                       k = 5,                          # number of reference neighbors
+                       save_as = 'cell_type_pred_knn', # metadata column to save result
+                       confidence = TRUE) {            # return prediction confidence                     
+    if (confidence) {
+        knn_pred = class::knn(as.data.frame(ref_obj$umap), as.data.frame(query_obj$umap), train_labels, k = k, prob = TRUE)
+        knn_prob = attributes(knn_pred)$prob
+        query_obj$meta_data[save_as] = knn_pred
+        query_obj$meta_data[paste0(save_as, '_prob')] = knn_prob
+    } else {
+        knn_pred = class::knn(as.data.frame(ref_obj$umap), as.data.frame(query_obj$umap), train_labels, k = k, prob = FALSE)
+        query_obj$meta_data[save_as] = knn_pred
+    }    
+    return(query_obj)
+}
+
 # Map main celltype
 print('Mapping main celltypes...')
 query_exp = seurat_merged$RNA$data
@@ -284,11 +301,19 @@ query = mapQuery(query_exp,             # query gene expression (genes x cells)
                 do_normalize = FALSE,  # perform log(CP10k+1) normalization on query
                 do_umap = TRUE,        # project query cells into reference UMAP
                 vars=variableTointegrateover.query) ### query batch variable to integrate over
-query = knnPredict(query, 
+if (knn_on_umap) {
+    query = knnPredictUMAP(query, 
+                           reference_main, 
+                           reference_main$meta_data[,maintype_col_name], 
+                           k = k,
+                           save_as = paste(maintype_col_name,'.pred',sep=''))
+} else {
+    query = knnPredict(query, 
                 reference_main, 
                 reference_main$meta_data[,maintype_col_name], 
                 k = k,
                 save_as = paste(maintype_col_name,'.pred',sep=''))
+}
             
 
 plotBasic(cbind(query$meta_data, query$umap), 
@@ -359,11 +384,20 @@ for (main_type in names(celltypes_with_sub)){
                         do_umap = TRUE,        # project query cells into reference UMAP
                         vars=variableTointegrateover.query) ### query batch variable to integrate over
 
-    query_sub = knnPredict(query_sub, 
+    if (knn_on_umap) {
+        query_sub = knnPredictUMAP(query_sub, 
                         reference_sub, 
                         reference_sub$meta_data[,subtype_col_name], 
                         k = k,
                         save_as = paste(main_type,'.pred',sep=''))
+    } else {
+        query_sub = knnPredict(query_sub, 
+                        reference_sub, 
+                        reference_sub$meta_data[,subtype_col_name], 
+                        k = k,
+                        save_as = paste(main_type,'.pred',sep=''))
+    }
+    
     umap_combined_labels = cbind(query_sub$meta_data, query_sub$umap)
     plotBasic(umap_combined_labels, 
             title = paste('Query Cells in Reference UMAP Space of', main_type), 
