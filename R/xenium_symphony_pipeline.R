@@ -493,7 +493,7 @@ plotProp <- function(proportions,
     # plot
     p = ggplot(proportions, aes(x=get(x_col_name), y=get(y_col_name))) + 
             geom_abline() + 
-            geom_point_rast(aes(col = get(celltype_col_name)))
+            geom_point(aes(col = get(celltype_col_name)))
     if (!is.null(color.mapping)) { p = p + scale_color_manual(values = color.mapping) }
     p = p + theme_bw() +
         labs(title = title, color = celltype_col_name) + 
