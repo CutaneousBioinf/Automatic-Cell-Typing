@@ -1,6 +1,9 @@
-library(Matrix, lib.loc="/home/alextsoi/R/R-4.4/lib/")
-library('Seurat',lib.loc="/home/alextsoi/R/R-4.4/lib/")
-library('Giotto',lib.loc="/home/alextsoi/R/R-4.4/lib/")
+# library(Matrix, lib.loc="/home/alextsoi/R/R-4.4/lib/")
+# library('Seurat',lib.loc="/home/alextsoi/R/R-4.4/lib/")
+# library('Giotto',lib.loc="/home/alextsoi/R/R-4.4/lib/")
+library(Matrix)
+library(Seurat)
+library(Giotto)
 set.seed(0)
 
 ########## Parameters ##########
@@ -101,7 +104,7 @@ giotto_object <- loadGiotto("/home/hhzhang/xenium_5k/kidney/20240724__224332/gob
 seurat_obj <- CreateSeuratObject(as.data.frame(giotto_object@expression$cell$rna$raw@exprMat), meta.data=as.data.frame(pDataDT(giotto_object)))    # This is for newer Giotto version (tested for v4.1.0)
 #seurat_obj <- CreateSeuratObject(giotto_object@norm_expr)
 seurat_obj <- NormalizeData(seurat_obj)
-seurat_objs <- c()
+c <- c()
 seurat_objs <- c(seurat_objs, seurat_obj)
 
 if (length(seurat_objs)>1) {

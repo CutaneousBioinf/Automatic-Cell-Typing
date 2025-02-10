@@ -9,9 +9,12 @@ if (length(args) < 1) {
 source(args[1])
 
 ###################################################
-library(Matrix, lib.loc="/home/alextsoi/R/R-4.4/lib/")
-library("Seurat", lib.loc="/home/alextsoi/R/R-4.4/lib/")
-library('symphony', lib.loc="/home/alextsoi/R/R-4.4/lib/")
+# library(Matrix, lib.loc="/home/alextsoi/R/R-4.4/lib/")
+# library("Seurat", lib.loc="/home/alextsoi/R/R-4.4/lib/")
+# library('symphony', lib.loc="/home/alextsoi/R/R-4.4/lib/")
+library(Matrix)
+library(Seurat)
+library(symphony)
 library('tibble')
 library('dplyr')
 library("irlba")
@@ -192,14 +195,16 @@ for (main_type in names(table(ref_metadata[,maintype_col_name]))){
 
 
 ########## Set up Functions for plot ##########
-library(ggplot2, lib.loc="/home/alextsoi/R/R-4.4/lib/")
+library(ggplot2)
+# library(ggplot2, lib.loc="/home/alextsoi/R/R-4.4/lib/")
 library(ggthemes)
 library(ggrastr)
 library(RColorBrewer)
 library(patchwork)
 library(ggpubr)
 library(Polychrome)
-library(cowplot, lib.loc="/home/alextsoi/R/R-4.4/lib/")
+library(cowplot)
+#library(cowplot, lib.loc="/home/alextsoi/R/R-4.4/lib/")
 
 plotBasic <- function(umap_labels,                # metadata, with UMAP labels in UMAP1 and UMAP2 slots
                     title = 'Query',         # Plot title
