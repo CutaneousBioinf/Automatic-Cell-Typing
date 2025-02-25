@@ -213,7 +213,7 @@ plotBasic <- function(umap_labels,                # metadata, with UMAP labels i
                     color.mapping = NULL,    # custom color mapping
                     legend.position = 'right', # Show cell type legend
                     save_path = './plot.png',
-                    size = c(8,10)) {  
+                    size = c(5,7)) {  
     
     p = umap_labels %>%
             dplyr::sample_frac(1L) %>% # permute rows randomly
@@ -226,9 +226,10 @@ plotBasic <- function(umap_labels,                # metadata, with UMAP labels i
     # Default formatting
     p = p + theme_bw() +
             labs(title = title, color = color.by) + 
-            theme(plot.title = element_text(hjust = 0.5, size=6)) +
+            theme(plot.title = element_text(hjust = 0.5, size=10)) +
             theme(legend.position=legend.position) +
             theme(legend.text = element_text(size=8), legend.title=element_text(size=10)) + 
+            theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
             guides(colour = guide_legend(override.aes = list(size = 4))) + guides(alpha = 'none')
 
     if(!is.null(facet.by)) {
@@ -270,8 +271,7 @@ plotBasic(cbind(reference_main$meta_data, reference_main$umap$embedding),
         title = 'Reference Cells in Reference UMAP Space of Main celltypes', 
         color.by = maintype_col_name,
         color.mapping = color.mapping.main,
-        save_path = paste(output_dir, '/1-main_celltype_refer.png', sep=''),
-        size = c(4,5))
+        save_path = paste(output_dir, '/1-main_celltype_refer.png', sep=''))
 #plotBasic(cbind(reference_main$meta_data, reference_main$umap$embedding), 
 #          title = 'Reference Cells in Reference UMAP Space of Main celltypes', 
 #          color.by = subtype_col_name,
@@ -325,8 +325,7 @@ plotBasic(cbind(query$meta_data, query$umap),
         title = 'Query Cells in Reference UMAP Space', 
         color.by = paste(maintype_col_name,'.pred',sep=''),
         save_path = paste(output_dir, '/2-main_celltype_pred.png', sep=''),
-        color.mapping = color.mapping.main,
-        size = c(4,5))
+        color.mapping = color.mapping.main)
 
 
 ### plot the scatterplot by transcript density density
@@ -369,8 +368,7 @@ for (main_type in names(celltypes_with_sub)){
             title = paste('Reference Cells in Reference UMAP Space of', main_type), 
             color.by = subtype_col_name,
             color.mapping = color.mapping.sub,
-            save_path = paste(output_dir, '/3-sub_celltype_refer_',gsub(' ','-',main_type),'.png', sep=''),
-            size = c(8,10))
+            save_path = paste(output_dir, '/3-sub_celltype_refer_',gsub(' ','-',main_type),'.png', sep=''))
 }
 
 
@@ -408,8 +406,7 @@ for (main_type in names(celltypes_with_sub)){
             title = paste('Query Cells in Reference UMAP Space of', main_type), 
             color.by = paste(main_type,'.pred',sep=''),
             color.mapping = color.mapping.sub,
-            save_path = paste(output_dir, '/4-sub_celltype_pred_',gsub(' ','-',main_type),'.png', sep=''),
-            size = c(8,10))
+            save_path = paste(output_dir, '/4-sub_celltype_pred_',gsub(' ','-',main_type),'.png', sep=''))
     query_sub$meta_data$celltype.pred.combined <- query_sub$meta_data[,paste(main_type,'.pred',sep='')]
     query_sub$meta_data[paste(main_type,'.UMAP1',sep='')] <- query_sub$umap['UMAP1']
     query_sub$meta_data[paste(main_type,'.UMAP2',sep='')] <- query_sub$umap['UMAP2']
@@ -489,9 +486,10 @@ plotProp <- function(proportions,
                     color.mapping = NULL,    # custom color mapping
                     legend.position = 'right', # Show cell type legend
                     save_path = './plot.png',
-                    size = c(8,10)) {  
+                    size = c(5,7.5)) {  
     # set limits of axis
     axis_limit <- ceiling(max(max(proportions[,x_col_name]),max(proportions[,y_col_name])) * 10) / 10
+    #axis_limit <- max(max(proportions[,x_col_name]),max(proportions[,y_col_name])) * 1.01
     # calculate spearman corr
     spearman <- cor.test(proportions[,x_col_name], proportions[,y_col_name], method='spearman')
     
@@ -499,21 +497,22 @@ plotProp <- function(proportions,
     p = ggplot(proportions, aes(x=get(x_col_name), y=get(y_col_name))) + 
             geom_abline() + 
             # geom_point_rast(aes(col = get(celltype_col_name)))
-            geom_point(aes(col = get(celltype_col_name)))
+            geom_point(aes(col = get(celltype_col_name)), size=3)
     if (!is.null(color.mapping)) { p = p + scale_color_manual(values = color.mapping) }
     p = p + theme_bw() +
         labs(title = title, color = celltype_col_name) + 
         theme(plot.title = element_text(hjust = 0.5)) +
         theme(legend.position='right') +
-        theme(legend.text = element_text(size=8), legend.title=element_text(size=12)) + 
+        theme(legend.text = element_text(size=8), legend.title=element_text(size=10)) + 
         theme(aspect.ratio=1) +
+        theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
         xlim(0, axis_limit) +
         ylim(0, axis_limit) +
         labs(x = x_label, y = y_label) +
         guides(colour = guide_legend(override.aes = list(size = 4))) + guides(alpha = 'none')
     # add results of Spearman Corr.
-    p = cowplot::add_sub(p, paste('Spearman Corr. =', spearman$estimate))
-    p = cowplot::add_sub(p, paste('p =', spearman$p.value))
+    p = cowplot::add_sub(p, paste('Spearman Corr. =', spearman$estimate), size = 8)
+    p = cowplot::add_sub(p, paste('p =', spearman$p.value), size = 8)
 
     # save plot
     ggsave(save_path, plot=p, width=size[2], height=size[1])
