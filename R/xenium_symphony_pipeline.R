@@ -110,7 +110,7 @@ reference = symphony::buildReferenceFromHarmonyObj(
 reference$normalization_method = 'log(CP10k+1)'
 
 # Save Symphony reference
-saveRDS(reference, paste(save_main_ref_dir, '/ref_main.rds', sep=''))
+saveRDS(reference, paste(save_main_ref_dir, '/2-ref_main.rds', sep=''))
 }
 
 ########## Build the Reference for Subtypes ##########
@@ -328,6 +328,7 @@ plotBasic(cbind(query$meta_data, query$umap),
         save_path = paste(output_dir, '/2-main_celltype_pred.png', sep=''),
         color.mapping = color.mapping.main)
 
+saveRDS(query, paste(output_dir, '/symphony_query_obj_main.rds', sep=''))
 
 ### plot the scatterplot by transcript density density
 
@@ -402,15 +403,18 @@ for (main_type in names(celltypes_with_sub)){
                         save_as = paste(main_type,'.pred',sep=''))
     }
     
+    saveRDS(query_sub, paste(output_dir, '/4-symphony_query_obj_sub_',gsub(' ','-',main_type),'.rds', sep=''))
+
     umap_combined_labels = cbind(query_sub$meta_data, query_sub$umap)
     plotBasic(umap_combined_labels, 
             title = paste('Query Cells in Reference UMAP Space of', main_type), 
             color.by = paste(main_type,'.pred',sep=''),
             color.mapping = color.mapping.sub,
             save_path = paste(output_dir, '/4-sub_celltype_pred_',gsub(' ','-',main_type),'.png', sep=''))
+    
     query_sub$meta_data$celltype.pred.combined <- query_sub$meta_data[,paste(main_type,'.pred',sep='')]
-    query_sub$meta_data[paste(main_type,'.UMAP1',sep='')] <- query_sub$umap['UMAP1']
-    query_sub$meta_data[paste(main_type,'.UMAP2',sep='')] <- query_sub$umap['UMAP2']
+    query_sub$meta_data[paste(main_type,'.UMAP1',sep='')] <- umap_combined_labels$UMAP1
+    query_sub$meta_data[paste(main_type,'.UMAP2',sep='')] <- umap_combined_labels$UMAP2
     if (i==1){
         sub_results = query_sub$meta_data
         i <- i+1
