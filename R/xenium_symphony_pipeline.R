@@ -110,7 +110,7 @@ reference = symphony::buildReferenceFromHarmonyObj(
 reference$normalization_method = 'log(CP10k+1)'
 
 # Save Symphony reference
-saveRDS(reference, paste(save_main_ref_dir, '/2-ref_main.rds', sep=''))
+saveRDS(reference, paste(save_main_ref_dir, '/ref_main.rds', sep=''))
 }
 
 ########## Build the Reference for Subtypes ##########
