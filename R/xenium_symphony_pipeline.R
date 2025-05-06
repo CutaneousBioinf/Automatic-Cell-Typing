@@ -19,6 +19,8 @@ library('tibble')
 library('dplyr')
 library("irlba")
 
+set.seed(0)
+
 ref_metadata <- ref_metadata %>% 
                 filter(!(get(maintype_col_name) %in% remove_maintype)) %>% 
                 filter(!(get(subtype_col_name) %in% remove_subtype)) %>%
