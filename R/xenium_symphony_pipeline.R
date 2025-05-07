@@ -246,10 +246,12 @@ plotBasic <- function(umap_labels,                # metadata, with UMAP labels i
 # to make colors more distinct
 # for main celltypes
 main.names <- names(table(ref_metadata[maintype_col_name])) %>% sort()
+set.seed(0)     # keep consistance of color between different run
 color.mapping.main <- createPalette(length(main.names),  c("#ff0000", "#00ff00", "#0000ff"))
 names(color.mapping.main) <- main.names
 # for sub celltypes
 sub.names <- names(table(ref_metadata[subtype_col_name])) %>% sort()
+set.seed(0)     # keep consistance of color between different run
 color.mapping.sub <- createPalette(length(sub.names),  c("#ff0000", "#00ff00", "#0000ff"))
 names(color.mapping.sub) <- sub.names
 
