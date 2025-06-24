@@ -438,16 +438,23 @@ for (main_type in names(celltypes_without_sub)){
     query$meta_data$celltype.pred.combined <- replace(query$meta_data$celltype.pred.combined, query$meta_data$celltype.pred.combined==main_type, unlist(celltypes_without_sub[main_type]))
 }               
 
-label_main <- query$meta_data %>% filter(!(celltype.pred.combined %in% names(celltypes_with_sub)))
+
 sub_results$celltype.pred.combined <- as.character(sub_results$celltype.pred.combined)
-label_final <- bind_rows(label_main, sub_results)
-label_final$celltype.pred.combined <- as.factor(label_final$celltype.pred.combined)
+sub_results <- sub_results %>% rownames_to_column()
+label_final <- query$meta_data %>% 
+    rownames_to_column() %>%
+    select(-c('celltype.pred.combined')) %>% # remove column celltype.pred.combined in query$meta_data
+    left_join(sub_results)
+label_final <- label_final %>%
+    mutate(celltype.pred.combined = ifelse(is.na(celltype.pred.combined), label_final[paste(maintype_col_name,'.pred',sep='')], celltype.pred.combined)) %>% # replace NA with main celltype
+    column_to_rownames()
+sub_results <- sub_results %>% column_to_rownames()
 
 saveRDS(label_final, file=paste(output_dir, '/symphony_celltype_results.rds', sep=''))
 write.csv(label_final, file=paste(output_dir, '/symphony_celltype_results.csv', sep=''), row.names = TRUE)
 
-print(str(label_final))
-print(table(label_final$celltype.pred.combined))
+#print(str(label_final))
+#print(table(label_final$celltype.pred.combined))
 
 
 #############################################################################################
