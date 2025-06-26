@@ -445,8 +445,9 @@ label_final <- query$meta_data %>%
     rownames_to_column() %>%
     select(-c('celltype.pred.combined')) %>% # remove column celltype.pred.combined in query$meta_data
     left_join(sub_results)
+label_final[paste(maintype_col_name,'.pred',sep='')] <- as.character(label_final[,paste(maintype_col_name,'.pred',sep='')]) # convert to character
 label_final <- label_final %>%
-    mutate(celltype.pred.combined = ifelse(is.na(celltype.pred.combined), label_final[paste(maintype_col_name,'.pred',sep='')], celltype.pred.combined)) %>% # replace NA with main celltype
+    mutate(celltype.pred.combined = ifelse(is.na(celltype.pred.combined), label_final[[paste(maintype_col_name,'.pred',sep='')]], celltype.pred.combined)) %>% # replace NA with main celltype
     column_to_rownames()
 sub_results <- sub_results %>% column_to_rownames()
 
