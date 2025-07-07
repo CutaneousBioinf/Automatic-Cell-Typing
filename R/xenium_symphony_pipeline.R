@@ -555,24 +555,25 @@ spearman.results <- data.frame(Item = c('Main Cell Types'),
 
 
 ## sub celltypes
-freq_refer <- as.data.frame(table(ref_metadata_cleaned[,subtype_col_name]))
-freq_query <- as.data.frame(table(label_final$celltype.pred.combined))
-# add cell types with 0 counts
-freq_refer$Var1 <- as.character(freq_refer$Var1)
-freq_query$Var1 <- as.character(freq_query$Var1)
-for (celltype in freq_refer$Var1){
-    if (celltype %in% freq_query$Var1){next}
-    freq_query = rbind(freq_query, data.frame(Var1=c(celltype), Freq=c(0)))
-}
-freq_refer = freq_refer %>% arrange(Var1)
-freq_query = freq_query %>% arrange(Var1)
+freq_refer <- as.data.frame(table(ref_metadata_cleaned[,subtype_col_name])) %>% 
+    rename(subcelltype=Var1,
+           freq.refer=Freq) %>%
+    mutate(freq.refer=as.integer(freq.refer))
+freq_query <- as.data.frame(table(label_final$celltype.pred.combined)) %>% 
+    rename(subcelltype=Var1,
+           freq.query=Freq) %>% 
+    mutate(freq.query=as.integer(freq.query)) 
+    
 
-proportions.sub <- data.frame(col1=freq_refer$Var1,
-                            col2=freq_refer$Freq,
-                            col3=freq_query$Freq,
-                            col4=freq_refer$Freq/sum(freq_refer$Freq),
-                            col5=freq_query$Freq/sum(freq_query$Freq),
-                            check.rows=TRUE)
+proportions.sub <- freq_refer %>% 
+    left_join(freq_query) %>% 
+    replace(is.na(.), 0)
+print(str(proportions.sub))
+proportions.sub <- proportions.sub %>%
+    mutate(prop.refer=proportions.sub$freq.refer/sum(proportions.sub$freq.refer),
+           prop.query=proportions.sub$freq.query/sum(proportions.sub$freq.query))
+
+
 names(proportions.sub) <- c(paste(subtype_col_name),
                             paste(subtype_col_name,'.freq.refer',sep=''),
                             paste(subtype_col_name,'.freq.pred',sep=''),
