@@ -79,4 +79,8 @@ The comparison of Spearman correlation shows as the table below:
 | Myeloid | 0.349 |
 | Tcells | 0.745 |
 
+## References
 
+Symphony
+
+* Kang, J.B., Nathan, A., Weinand, K. et al. Efficient and precise single-cell reference atlas mapping with Symphony. Nat Commun 12, 5890 (2021). https://doi.org/10.1038/s41467-021-25957-x
