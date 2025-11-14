@@ -109,6 +109,7 @@ seurat_objs <- c(seurat_objs, seurat_obj)
 
 if (length(seurat_objs)>1) {
     seurat_merged <- merge(seurat_objs[[1]], y=seurat_objs[2:length(seurat_objs)], add.cell.ids=paste('obj',as.character(c(1:length(seurat_objs))),sep=''))
+    seurat_merged <- JoinLayers(seurat_merged)
     colnames(seurat_merged) <- sub("_", "-", colnames(seurat_merged))
 } else {
     seurat_merged <- seurat_objs[[1]]
