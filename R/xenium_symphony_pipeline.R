@@ -123,14 +123,24 @@ print(table(ref_metadata[,maintype_col_name]))
 
 for (main_type in names(table(ref_metadata[,maintype_col_name]))){
     print(paste('Start building reference for', main_type, '...'))
+
     ref_metadata_sub <- ref_metadata_for_sub %>%    # notice: here is not the processed data in last step
                         filter(get(maintype_col_name) == main_type)
     ref_metadata_sub[subtype_col_name] <- droplevels(ref_metadata_sub[subtype_col_name])
+
     print(table(ref_metadata_sub[,subtype_col_name]))
+
     if (length(table(ref_metadata_sub[,subtype_col_name])) <= 1){       
         print('No subtype found. Skip.')
         next
     }
+    
+    # calculate var genes for each subtype
+    ref_exp_sub <- ref_exp_for_sub[,rownames(ref_metadata_sub)]
+    var_genes_sub = vargenes_vst(ref_exp_sub, groups = as.character(ref_metadata_sub[[VariableToGroup]]), topn = 500)
+    ref_exp_sub = ref_exp_sub[var_genes_sub, ]
+
+
     if (downsample) {
         if (dim(ref_metadata_sub)[1]>downsample_to){
             ref_metadata_sub <- ref_metadata_sub %>% 
@@ -140,7 +150,7 @@ for (main_type in names(table(ref_metadata[,maintype_col_name]))){
                             column_to_rownames()
         }
     }
-    ref_exp_sub <- ref_exp_for_sub[,rownames(ref_metadata_sub)]
+    ref_exp_sub <- ref_exp_sub[,rownames(ref_metadata_sub)]
     ref_exp_sub <- ref_exp_sub[rowSums(ref_exp_sub)>0,]
 
     # Calculate and save the mean and standard deviations for each gene
