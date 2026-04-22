@@ -30,10 +30,23 @@ ref_exp <- ref_exp[,rownames(ref_metadata)]
 
 #####################################
 ### subset most variable genes, need to intersect with spatial data first
-ref_exp=ref_exp[intersect(rownames(ref_exp),rownames(seurat_merged)),]
+ref_exp <- ref_exp[intersect(rownames(ref_exp),rownames(seurat_merged)),]
 
-var_genes = vargenes_vst(ref_exp, groups = as.character(ref_metadata[[VariableToGroup]]), topn = 500)
-ref_exp = ref_exp[var_genes, ]
+# Keep how many var genes
+n_overlap_gene <- length(intersect(rownames(ref_exp),rownames(seurat_merged)))
+print(paste('Number of overlapped genes for main cell type:', n_overlap_gene))
+if (KeepVarGenes > 1 ){
+    n_keep_var_gene <- KeepVarGenes
+} else if (KeepVarGenes > 0 & KeepVarGenes <= 1) {
+    n_keep_var_gene <- as.integer(n_overlap_gene * KeepVarGenes)
+} else {
+    stop('Invalid value of KeepVarGenes!')
+}
+print(paste('Keep top', n_keep_var_gene, 'variable genes in each group .'))
+
+
+var_genes <- vargenes_vst(ref_exp, groups = as.character(ref_metadata[[VariableToGroup]]), topn = n_keep_var_gene)
+ref_exp <- ref_exp[var_genes, ]
 
 
 #####################################
@@ -137,7 +150,7 @@ for (main_type in names(table(ref_metadata[,maintype_col_name]))){
     
     # calculate var genes for each subtype
     ref_exp_sub <- ref_exp_for_sub[,rownames(ref_metadata_sub)]
-    var_genes_sub = vargenes_vst(ref_exp_sub, groups = as.character(ref_metadata_sub[[VariableToGroup]]), topn = 500)
+    var_genes_sub = vargenes_vst(ref_exp_sub, groups = as.character(ref_metadata_sub[[VariableToGroup]]), topn = n_keep_var_gene)
     ref_exp_sub = ref_exp_sub[var_genes_sub, ]
 
 

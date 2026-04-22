@@ -10,7 +10,9 @@ set.seed(0)
 skip_build_ref_main = FALSE
 skip_build_ref_sub = FALSE
 
-VariableToGroup="sample" ### variable in the metadata to group in symphony variable selection step
+VariableToGroup = "sample" ### variable in the metadata to group in symphony variable selection step
+KeepVarGenes = 500 ### In selecting var genes, keep how many genes in each group of 'VariableToGroup'.  Integer > 1: number of gene. Float in (0, 1]: fraction of overlapped genes.
+
 variableTointegrateover.query="sample_ID" ### variable in query to integrate over for mapquery
 
 
