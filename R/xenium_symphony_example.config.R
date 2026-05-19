@@ -78,7 +78,7 @@ output_dir <- '/home/alextsoi/Researches/AMP_Xenium_5kpanel/kidney/Early_Disease
 ####################### if provide a seurat object directly
 seurat_obj = readRDS('/hits/AMP1_SLE/Kidney_November_2024/downsample.RDS')
 seurat_obj = NormalizeData(seurat_obj)     # log(CP10K + 1) normalization
-ref_exp = seurat_obj$RNA@data    # gene x cell, should be log(CP10K + 1) normalized 
+ref_exp = seurat_obj$RNA$data    # gene x cell, should be log(CP10K + 1) normalized 
 ref_metadata = seurat_obj@meta.data
 
 
