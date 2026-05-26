@@ -46,12 +46,12 @@ print(paste('Keep top', n_keep_var_gene, 'variable genes in each group .'))
 
 
 var_genes <- vargenes_vst(ref_exp, groups = as.character(ref_metadata[[VariableToGroup]]), topn = n_keep_var_gene)
+ref_exp_for_sub <- ref_exp
 ref_exp <- ref_exp[var_genes, ]
 
 
 #####################################
 ref_metadata_for_sub <- ref_metadata
-ref_exp_for_sub <- ref_exp
 
 
 ########## Build the Reference for Main Celltypes ##########
@@ -139,6 +139,11 @@ for (main_type in names(table(ref_metadata[,maintype_col_name]))){
 
     ref_metadata_sub <- ref_metadata_for_sub %>%    # notice: here is not the processed data in last step
                         filter(get(maintype_col_name) == main_type)
+    ref_metadata_sub <- ref_metadata_sub %>%
+                        rownames_to_column(var='temp_cellID') %>%   # add_count may change rownames, so use this too save rownames(cell ID)
+                        add_count(.data[[VariableToGroup]], name = 'group_ct') %>% 
+                        column_to_rownames(var='temp_cellID') %>%
+                        filter(group_ct > 1)
     ref_metadata_sub[subtype_col_name] <- droplevels(ref_metadata_sub[subtype_col_name])
 
     print(table(ref_metadata_sub[,subtype_col_name]))
