@@ -331,7 +331,12 @@ knnPredictUMAP <- function(query_obj, ref_obj,
 
 # Map main celltype
 print('Mapping main celltypes...')
-query_exp = seurat_merged$RNA$data
+QUERY_TYPE <- 'default'
+if (!exists('query_exp')){
+    query_exp = seurat_merged$RNA$data
+} else {
+   QUERY_TYPE <- 'Xenium'
+}
 query_metadata= seurat_merged@meta.data
 query = mapQuery(query_exp,             # query gene expression (genes x cells)
                 query_metadata,        # query metadata (cells x attributes)
@@ -363,10 +368,20 @@ plotBasic(cbind(query$meta_data, query$umap),
 saveRDS(query, paste(output_dir, '/symphony_query_obj_main.rds', sep=''))
 
 ### plot the scatterplot by transcript density density
-
 pdf(paste(output_dir, '/2-main_celltype_pred_nCount.pdf', sep=''))
-    mid <- mean(log10(query$meta_data$nCount_RNA))
-    ggplot(query$meta_data, aes(x=query$umap[,1], y=query$umap[,2])) +geom_point(aes(color = log10(nCount_RNA)), alpha=0.5) + theme_bw()+ scale_color_gradient2(midpoint = mid, low = "blue", mid = "white",high = "red")+ggtitle("log10 nCount")
+    if (QUERY_TYPE == 'default'){
+        mid <- mean(log10(query$meta_data$nCount_RNA))
+        ggplot(query$meta_data, aes(x=query$umap[,1], y=query$umap[,2])) + 
+            geom_point(aes(color = log10(nCount_RNA)), alpha=0.5) + 
+            theme_bw()+ scale_color_gradient2(midpoint = mid, low = "blue", mid = "white",high = "red") + 
+            ggtitle("log10 nCount")
+    } else {
+        mid <- mean(log10(query$meta_data$nCount_Xenium))
+        ggplot(query$meta_data, aes(x=query$umap[,1], y=query$umap[,2])) + 
+            geom_point(aes(color = log10(nCount_Xenium)), alpha=0.5) + 
+            theme_bw()+ scale_color_gradient2(midpoint = mid, low = "blue", mid = "white",high = "red") + 
+            ggtitle("log10 nCount")
+    } 
 dev.off()
 
 
@@ -413,7 +428,8 @@ sub_results = data.frame()
 for (main_type in names(celltypes_with_sub)){
     reference_sub <- readRDS(paste(save_sub_ref_dir,'/ref_sub_',gsub(' ','-',main_type),'.rds', sep=''))
     query_metadata_sub = query$meta_data[query$meta_data[paste(maintype_col_name,'.pred',sep='')] == main_type,]
-    query_exp_sub = as.array(query$exp)[,rownames(query_metadata_sub)]
+    #query_exp_sub = as.array(query$exp)[,rownames(query_metadata_sub)]
+    query_exp_sub = query$exp[,rownames(query_metadata_sub)]
     query_sub = mapQuery(query_exp_sub,             # query gene expression (genes x cells)
                         query_metadata_sub,        # query metadata (cells x attributes)
                         reference_sub,             # Symphony reference object
@@ -647,7 +663,8 @@ write.csv(spearman.results, file=paste(output_dir, '/5-celltype_proportion_spear
 
 
 ########## Draw Bubble Plot ##########
-count <- as.matrix(seurat_merged$RNA$counts)
+#count <- as.matrix(seurat_merged$RNA$counts)
+count <- as.matrix(seurat_merged@assays$Xenium@layers$counts@matrix) #########################################################
 label_final <- readRDS(paste(output_dir, '/symphony_celltype_results.rds', sep=''))
 
 subtype <- data.frame(cellid = rownames(label_final), celltype=label_final[,paste(maintype_col_name,'.pred',sep='')])
@@ -716,7 +733,11 @@ plotBubble(seurat_obj=seurat,
         save_path=paste(output_dir, '/6-bubble_plot_main.png', sep=''))
 
 ## for sub-types
-count <- as.matrix(seurat_merged$RNA$data)
+if (QUERY_TYPE == 'default') {
+    count <- as.matrix(seurat_merged$RNA$data)
+} else {
+    count <- as.matrix(seurat_merged@assays$Xenium@layers$counts@matrix)
+}
 label_final <- readRDS(paste(output_dir, '/symphony_celltype_results.rds', sep=''))
 
 subtype <- data.frame(cellid = rownames(label_final), celltype=label_final$celltype.pred.combined)

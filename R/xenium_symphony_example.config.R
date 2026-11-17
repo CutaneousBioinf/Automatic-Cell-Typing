@@ -117,3 +117,14 @@ if (length(seurat_objs)>1) {
 } else {
     seurat_merged <- seurat_objs[[1]]
 }
+
+####### If provide a Seurat Object ##########
+##library(BPCells) #if needed
+#seurat_merged <- readRDS('/home/yulicai/spatial/BPcell_xenium/mergrd_xenium_joinlayer_sct.rds')
+#seurat_merged <- NormalizeData(seurat_merged)
+
+####### If provide a Seurat Object xenium ##########
+##library(BPCells) #if needed
+#seurat_merged <- readRDS('/home/yulicai/spatial/BPcell_xenium/BPcell_symphony/subsets/sobj_sub_1.rds')
+#seurat_merged <- NormalizeData(seurat_merged)
+#query_exp <- seurat_merged@assays$Xenium@layers$counts@matrix
