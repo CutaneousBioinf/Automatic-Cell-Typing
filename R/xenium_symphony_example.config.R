@@ -10,33 +10,33 @@ set.seed(0)
 skip_build_ref_main = FALSE
 skip_build_ref_sub = FALSE
 
-VariableToGroup = "sample" ### variable in the metadata to group in symphony variable selection step
+VariableToGroup = "orig.ident" ### variable in the metadata to group in symphony variable selection step
 KeepVarGenes = 500 ### In selecting var genes, keep how many genes in each group of 'VariableToGroup'.  Integer > 1: number of gene. Float in (0, 1]: fraction of overlapped genes.
 
 variableTointegrateover.query="sample_ID" ### variable in query to integrate over for mapquery
 
 
-maintype_col_name = 'cell2'  # column in metadata representing main celltype
-subtype_col_name = 'celltype'   # column in metadata representing sub celltype
+maintype_col_name = 'celltype'  # column in metadata representing main celltype
+subtype_col_name = 'subtype'   # column in metadata representing sub celltype
 
 remove_maintype = c()   # You may want to exclude some celltypes, like missing celltypes. If not, leave it empty, c(). 
 remove_subtype = c('')    # It happens at the very beginning, before downsampling and calculating cell proportions. 
 
-downsample = TRUE    # You may need downsampling when you have too many cells. If input is too large, it will cause an error in library Matrix.
+downsample = FALSE    # You may need downsampling when you have too many cells. If input is too large, it will cause an error in library Matrix.
 downsample_to = 100000  # The number of cells you want to keep. Final number may be slightly different. Ignore it when downsample=FALSE.
 vars_use = c('sample') # Covariants in reference to remove in harmony
 num_PC = 40     # The number of principle components used to build references. Default=20
 theta = c(2)   # Diversity clustering penalty parameter. Specify for each variable in vars_use Default theta=2. theta=0 does not encourage any diversity. Larger theta results in more diverse clusters.
 
-save_main_ref_dir = '/home/alextsoi/Researches/AMP_Xenium_5kpanel/kidney/Early_Disease/20240724__224332_20240812__180808/analysis/Symphony_test/ref'
+save_main_ref_dir = '/main/reference/dir'
 save_main_uwot_dir = save_main_ref_dir
-save_sub_ref_dir = '/home/alextsoi/Researches/AMP_Xenium_5kpanel/kidney/Early_Disease/20240724__224332_20240812__180808/analysis/Symphony_test/ref'
+save_sub_ref_dir = save_main_ref_dir
 save_sub_uwot_dir = save_sub_ref_dir
 
 k = 50   # the k of KNN in mapping.
 knn_on_umap = TRUE  # Do KNN on UMAP coordinates rather than Symphony embedding.
 
-output_dir <- '/home/alextsoi/Researches/AMP_Xenium_5kpanel/kidney/Early_Disease/20240724__224332_20240812__180808/analysis/Symphony_test/20240724__224332'   # directory for saving analyzing results
+output_dir <- '/save/outputs/dir'   # directory for saving analyzing results
 
 
 
@@ -101,7 +101,8 @@ ref_metadata = seurat_obj@meta.data
 #giotto_object <- readRDS('/home/yulicai/symphony/mucosa/data/gobject.RDS')
 #seurat_obj <- CreateSeuratObject(giotto_object@raw_exprs)   # This is for older Giotto version
 
-giotto_object <- loadGiotto("/home/hhzhang/xenium_5k/kidney/20240724__224332/gobj",reconnect_giottoImage=F)
+giotto_object <- loadGiotto("/home/hhzhang/xenium_5k/kidney/20240724__224332/gobj",reconnect_giottoImage=F) # Standard method to load Giotto
+#giotto_object <- readRDS('/home/hhzhang/xenium_5k/kidney/20240724__224332/gobj/gobject.RDS')  # much faster 
 
 seurat_obj <- CreateSeuratObject(as.data.frame(giotto_object@expression$cell$rna$raw@exprMat), meta.data=as.data.frame(pDataDT(giotto_object)))    # This is for newer Giotto version (tested for v4.1.0)
 #seurat_obj <- CreateSeuratObject(giotto_object@norm_expr)
