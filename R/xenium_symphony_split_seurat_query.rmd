@@ -1,0 +1,25 @@
+When the query seurat is too large, split it into subsets.
+Need maually create configs. (You can skip building reference)
+```{R}
+library(Seurat)
+```
+```{R}
+sobj <- readRDS('/home/yulicai/spatial/BPcell_xenium/mergrd_xenium_joinlayer_sct.rds')
+```
+```{R}
+n <- 5
+set.seed(111)
+sobj$random_group <- ave(
+    seq_len(ncol(sobj)),
+    sobj$sample_ID,     # subsets will have same proportion of samples
+    FUN = function(x) sample(rep(seq_len(n), length.out = length(x)))
+)
+```
+```{R}
+seurat_list <- SplitObject(sobj, split.by = 'random_group')
+```
+```{R}
+for (i in seq_along(seurat_list)){
+    saveRDS(seurat_list[[i]], file = paste0('/path/to/save/sobj_sub_',i,'.rds'))
+}
+```
